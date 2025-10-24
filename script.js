@@ -1,7 +1,7 @@
 // 🌟 Premium Jungle × Magical - Complete Frontend Logic
 
-// API URL - Update with your deployed web app URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwfDfRT9uq-IobDQQWeIDfinjnCJ0LIC1zKvt6iWCRL3kid9mZtgL5aFAhDj486Tj8E/exec';
+// API URL - Use your deployed web app URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbwLnoJbfQDNmJaVoNkL8XbLkAKSem9-bVHrraMZcMR6ptVjZNDMl57qmqDHxXuVXibg/exec';
 
 // Premium Application State
 const APP_STATE = {
@@ -19,66 +19,140 @@ const APP_STATE = {
 function getDisplayName(malaysianName) {
     if (!malaysianName) return '';
     
-    // Remove common suffixes and prefixes
+    // Remove common suffixes and prefixes, keep the meaningful parts
     const name = malaysianName
-        .replace(/BIN\s+/i, '')
-        .replace(/BINTI\s+/i, '')
-        .replace(/BINTE\s+/i, '')
-        .replace(/ANAK\s+/i, '')
+        .replace(/BIN\s+/gi, '')
+        .replace(/BINTI\s+/gi, '')
+        .replace(/BINTE\s+/gi, '')
+        .replace(/ANAK\s+/gi, '')
         .trim();
     
     // Take first 2-3 words for better identification
-    const words = name.split(' ');
+    const words = name.split(' ').filter(word => word.length > 0);
     if (words.length >= 3) {
         return words.slice(0, 3).join(' ');
     } else if (words.length === 2) {
         return words.join(' ');
     } else {
-        return words[0];
+        return words[0] || malaysianName;
     }
 }
 
-// Premium API Communication - FIXED CORS ISSUE
+// Premium API Communication with better error handling
 async function callAPI(params = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
     try {
         const urlParams = new URLSearchParams(params);
-        const response = await fetch(`${API_URL}?${urlParams}`);
+        console.log('🔄 Calling API:', params.action, 'with params:', params);
+        
+        const response = await fetch(`${API_URL}?${urlParams}`, {
+            method: 'GET',
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('API Response:', data);
+        console.log('✅ API Response received:', data);
         return data;
         
     } catch (error) {
-        console.error('API Call failed:', error);
-        return getPremiumMockData(params.action, params);
+        console.error('❌ API Call failed:', error);
+        clearTimeout(timeoutId);
+        
+        // Return enhanced mock data for development
+        return getEnhancedMockData(params.action, params);
     }
 }
 
-// Enhanced Mock Data for Premium Experience (Fallback only)
-function getPremiumMockData(action, params) {
+// Enhanced Mock Data with ALL your students
+function getEnhancedMockData(action, params) {
+    console.log('🔄 Using enhanced mock data for:', action);
+    
     const mockGroups = {
         "4 Pearl": {
             "Pre-A1": {
                 "🐯 The Mighty Tigers": {
-                    totalPoints: 156,
+                    totalPoints: 245,
                     members: [
-                        { name: "ADELLA KAISARA BINTI AMDAN", points: 45 },
-                        { name: "AHMAD JIHAD BIN ABDULLAH", points: 38 },
-                        { name: "ANJENNY PAILEE", points: 52 },
-                        { name: "AZIZAH ALISHA BINTI AZMIZAN AZRIN", points: 21 }
+                        { name: "ADELLA KAISARA BINTI AMDAN", points: 65 },
+                        { name: "AHMAD JIHAD BIN ABDULLAH", points: 58 },
+                        { name: "ANJENNY PAILEE", points: 72 },
+                        { name: "AZIZAH ALISHA BINTI AZMIZAN AZRIN", points: 35 },
+                        { name: "AZIB ARYAN BIN A.RAHMAN", points: 15 }
                     ]
                 },
                 "🐼 The Brave Bears": {
-                    totalPoints: 128,
+                    totalPoints: 198,
                     members: [
-                        { name: "GIDEON GALE GARRY", points: 35 },
-                        { name: "FAREL BIN ARSID", points: 42 },
-                        { name: "INDRA PUTRA BIN JAINI", points: 28 },
-                        { name: "MOHAMMAD ABDUL KHALIQ BIN NAISAR", points: 23 }
+                        { name: "GIDEON GALE GARRY", points: 45 },
+                        { name: "FAREL BIN ARSID", points: 52 },
+                        { name: "INDRA PUTRA BIN JAINI", points: 38 },
+                        { name: "MOHAMMAD ABDUL KHALIQ BIN NAISAR", points: 33 },
+                        { name: "MOHAMAD NUR ZAQIF ZIQRI BIN MOHAMAD TINO", points: 30 }
+                    ]
+                },
+                "🐰 The Swift Rabbits": {
+                    totalPoints: 215,
+                    members: [
+                        { name: "MUHAMMAD DANISH IFWAT BIN MUHAMMAD IFFAD", points: 55 },
+                        { name: "MOHAMAD AL HAKIM BIN MOHAMAD RAJAN", points: 48 },
+                        { name: "MOHAMAD RAID RUZAIMIE BIN MOHD SALIHAN", points: 42 },
+                        { name: "NUR AIN HAWA SYAKIELA BINTI ILHAM SUKRI", points: 35 },
+                        { name: "MUHAMMAD IRMANSYAH BIN ABDUL BASIR", points: 35 }
+                    ]
+                }
+            },
+            "Low A1": {
+                "🦊 The Clever Foxes": {
+                    totalPoints: 180,
+                    members: [
+                        { name: "MUHAMMAD YUSUF BIN ANNUAR", points: 45 },
+                        { name: "NOR ZAMIRAH QALISYAH BINTI MOHD ZAMIRUL", points: 40 },
+                        { name: "MUHAMMAD RAYYAN BIN ARNER", points: 35 },
+                        { name: "MUHAMMAD AKIF QAIYYUM BIN RANO", points: 32 },
+                        { name: "MUHAMMAD ASNAWI BIN HAMZAH", points: 28 }
+                    ]
+                }
+            },
+            "Mid A1": {
+                "🦅 The Brave Eagles": {
+                    totalPoints: 225,
+                    members: [
+                        { name: "NOOR QASEH NADIA BINTI ABDULLAH", points: 60 },
+                        { name: "MIESYA NUR SYAZIERRA BINTI ISA", points: 55 },
+                        { name: "MOHAMAD WAN MARZUQI BIN MAZLAN", points: 45 },
+                        { name: "NOR FATIYYAH FARAHANIE BINTI ZAINI", points: 35 },
+                        { name: "MUHAMMAD NAZRIN BIN ZULLASRI", points: 30 }
+                    ]
+                },
+                "🐆 The Swift Panthers": {
+                    totalPoints: 195,
+                    members: [
+                        { name: "MUHAMMAD AL FATIH BIN MOHAMAD FAIZAL AFINDI", points: 50 },
+                        { name: "NUBHAN BIN JAMIL", points: 45 },
+                        { name: "NURUL FARAH KHALISYAH BINTI PABIL", points: 40 },
+                        { name: "NURUL ALISA SAPPIKA BINTI ABDULLAH", points: 35 },
+                        { name: "MUHAMMAD FAIS BIN HENRAL", points: 25 }
+                    ]
+                }
+            },
+            "High A1": {
+                "🦋 The Shining Butterflies": {
+                    totalPoints: 268,
+                    members: [
+                        { name: "PUTRI ARIESA ZULAIKHA BINTI JUISAL", points: 65 },
+                        { name: "PUTERI MYA ARLISSA BINTI MOHD BAKRI", points: 58 },
+                        { name: "MUHAMMAD IRFAN BIN UDAYKUMAR CHOCKALINGAM SHANMUGAM", points: 50 },
+                        { name: "MUHAMMAD IKMAL BIN RIDSMAR", points: 45 },
+                        { name: "SYARIF ABDUL HALIM BIN ALNASIR", points: 35 },
+                        { name: "SITI NUR PUTRI BALQISHAH BINTI MOHD ZALANI", points: 15 }
                     ]
                 }
             }
@@ -86,12 +160,59 @@ function getPremiumMockData(action, params) {
         "4 Crystal": {
             "Pre-A1": {
                 "🐒 The Playful Monkeys": {
-                    totalPoints: 142,
+                    totalPoints: 312,
                     members: [
-                        { name: "ASHIRAH BINTI ASIS", points: 38 },
-                        { name: "AIDIL FAZLI BIN ABDULLAH", points: 45 },
-                        { name: "AL SYAMIR BIN ABDUL NASIR", points: 32 },
-                        { name: "ELYANA BINTI MARTIN", points: 27 }
+                        { name: "ASHIRAH BINTI ASIS", points: 75 },
+                        { name: "AIDIL FAZLI BIN ABDULLAH", points: 68 },
+                        { name: "AL SYAMIR BIN ABDUL NASIR", points: 55 },
+                        { name: "ELYANA BINTI MARTIN", points: 45 },
+                        { name: "HAFIZAM AKIM BIN ABDUL AZIS", points: 35 },
+                        { name: "HAIJAL BIN JAINAL", points: 18 },
+                        { name: "IMANINA HUSNA BINTI MUHAMMAD SALI", points: 16 },
+                        { name: "MOHAMMAD HAIKAL HAKIMI BIN ABDULLAH", points: 0 },
+                        { name: "MOHAMMAD AIREIL DANNISH BIN ASYRAT", points: 0 }
+                    ]
+                },
+                "🦉 The Wise Owls": {
+                    totalPoints: 285,
+                    members: [
+                        { name: "MOHAMED DANIEL IMAN BIN BOHARI", points: 65 },
+                        { name: "MOHAMAD RAIDI SAHRIMAL BIN JAMRI", points: 58 },
+                        { name: "MUHAMAD AZRUL BIN AZLAN", points: 52 },
+                        { name: "MUHAMMAD NOOR FAZRIE BIN AMRAN", points: 45 },
+                        { name: "NUR ARYSA QAISARA BINTI MASRI", points: 35 },
+                        { name: "NAEL BIN MOHD NIJAR", points: 15 },
+                        { name: "NIRWANSA BIN RANO", points: 10 },
+                        { name: "NORAINA BINTI ABDULLAH", points: 5 }
+                    ]
+                },
+                "🐺 The Fearless Wolves": {
+                    totalPoints: 275,
+                    members: [
+                        { name: "NUR PATIAH BINTI ABDULLAH", points: 62 },
+                        { name: "NUR KHATIJA BINTI IBRAHIM", points: 55 },
+                        { name: "NURUL HUMAIRA BINTI ASANAL", points: 48 },
+                        { name: "NAISHA BINTI AZMAN", points: 42 },
+                        { name: "NUR AFFINA AULIA BINTI RIZAL", points: 35 },
+                        { name: "MUHAMMAD DANNY ASHRAF BIN ABDULLAH", points: 18 },
+                        { name: "MUHAMMAD AADAM KHALIF BIN MUHAMMAD HAIRUL NIZAM", points: 10 },
+                        { name: "NURAISYAH NATASYA BINTI MOHD HANIF WASNI", points: 5 }
+                    ]
+                },
+                "🦁 The Glorious Lions": {
+                    totalPoints: 325,
+                    members: [
+                        { name: "NURAZLIYANAH BATRISHA BINTI SABRI", points: 75 },
+                        { name: "MOHAMAD RIZANI SYAHIZIEY BIN ABDULLAH", points: 68 },
+                        { name: "MUHAMMAD HAIZUL BIN OMAR", points: 60 },
+                        { name: "MUHAMMAD QAWIEM RAFIQ BIN RAZLAN", points: 52 },
+                        { name: "NUR AZMINA BINTI ABDULLAH", points: 45 },
+                        { name: "MOHAMMAD SHAZWAN BIN NAZMI", points: 15 },
+                        { name: "NURUL ALYA ZULAIKHA BINTI SINAKASONI", points: 5 },
+                        { name: "NURLUTHFIA AZZAHRA BINTI JUWAWI", points: 3 },
+                        { name: "SITI UMAIRAH BINTI IBRAHIM", points: 2 },
+                        { name: "WHIRYAN SHAH BIN MOHD NORHISMAL", points: 0 },
+                        { name: "MUHAMMAD HAFIZ UQASYAH BIN ABDULLAH", points: 0 }
                     ]
                 }
             }
@@ -100,11 +221,13 @@ function getPremiumMockData(action, params) {
 
     switch(action) {
         case 'getGroups':
+            const classData = params.class ? { [params.class]: mockGroups[params.class] } : mockGroups;
             return {
                 success: true,
-                data: params.class ? { [params.class]: mockGroups[params.class] } : mockGroups,
+                data: classData,
                 premium: true,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                isMockData: true
             };
         case 'verifyAdmin':
             return { 
@@ -124,7 +247,7 @@ function getPremiumMockData(action, params) {
         case 'initializeData':
             return {
                 success: true,
-                message: "Data initialized successfully",
+                message: "Mock data initialized successfully",
                 totalStudents: 72,
                 premium: true
             };
@@ -137,82 +260,50 @@ function getPremiumMockData(action, params) {
     }
 }
 
-// Enhanced initialization with better loading handling
+// Enhanced initialization
 async function initializePremiumApp() {
     console.log('🚀 Initializing Premium Jungle App...');
     
-    // Show loading screen immediately
     showLoadingScreen();
-    
-    // Check for stored authentication
     checkStoredAuth();
-    
-    // Setup event listeners
     setupPremiumEventListeners();
-    
-    // Update UI based on auth state
     updateUIForAuth();
     
     try {
-        // Load initial data
         await loadDashboardData(APP_STATE.currentClass);
-        
-        // Simulate minimum loading time for better UX (2 seconds)
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
     } catch (error) {
-        console.error('Error during initialization:', error);
+        console.error('Initialization error:', error);
         showToast('Welcome to Jungle × Magical! 🎉', 'success');
     } finally {
-        // Always hide loading screen after minimum time
         setTimeout(() => {
             hideLoadingScreen();
-            showToast('Welcome to the Premium Jungle Experience! 🌟✨', 'success');
+            showToast('Welcome to the Enchanted Jungle! 🌟✨', 'success');
             createSparkleEffect();
-            
-            // Mark loading as complete
             APP_STATE.isLoading = false;
         }, 2500);
     }
 }
 
-// Enhanced loading screen functions
+// Loading screen functions
 function showLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
     const app = document.getElementById('app');
-    
-    if (loadingScreen) {
-        loadingScreen.classList.remove('hidden');
-        loadingScreen.style.display = 'flex';
-    }
-    if (app) {
-        app.classList.add('hidden');
-        app.style.display = 'none';
-    }
-    
-    console.log('📱 Loading screen shown');
+    if (loadingScreen) loadingScreen.classList.remove('hidden');
+    if (app) app.classList.add('hidden');
 }
 
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen');
     const app = document.getElementById('app');
-    
-    if (loadingScreen) {
-        loadingScreen.classList.add('hidden');
-        loadingScreen.style.display = 'none';
-    }
-    if (app) {
-        app.classList.remove('hidden');
-        app.style.display = 'block';
-    }
-    
-    console.log('🎉 Loading screen hidden, app shown');
+    if (loadingScreen) loadingScreen.classList.add('hidden');
+    if (app) app.classList.remove('hidden');
 }
 
 // Premium Data Loading
 async function loadDashboardData(className = APP_STATE.currentClass) {
     try {
-        showToast('Loading premium jungle data...', 'info');
+        showToast('Loading jungle data...', 'info');
         
         const result = await callAPI({
             action: 'getGroups',
@@ -223,17 +314,21 @@ async function loadDashboardData(className = APP_STATE.currentClass) {
             APP_STATE.groupsData = result.data;
             renderPremiumDashboard(className);
             updateLastUpdated();
-            console.log('✅ Dashboard data loaded successfully');
+            
+            if (result.isMockData) {
+                showToast('Using demo data - All 72 students loaded! 🎉', 'info');
+            } else {
+                showToast('Real data loaded successfully! ✅', 'success');
+            }
         } else {
             throw new Error(result.error || 'Failed to load data');
         }
         
     } catch (error) {
-        console.error('❌ Error loading dashboard:', error);
-        showToast('Using demo data - API connection required', 'info');
+        console.error('Error loading dashboard:', error);
+        showToast('Using enhanced demo data with all students 📊', 'info');
         
-        // Fallback to enhanced mock data
-        APP_STATE.groupsData = getPremiumMockData('getGroups', { class: className }).data;
+        APP_STATE.groupsData = getEnhancedMockData('getGroups', { class: className }).data;
         renderPremiumDashboard(className);
         updateLastUpdated();
     }
@@ -242,22 +337,22 @@ async function loadDashboardData(className = APP_STATE.currentClass) {
 // Premium Dashboard Rendering
 function renderPremiumDashboard(className) {
     const grid = document.getElementById('groupsGrid');
-    if (!grid) {
-        console.error('❌ Groups grid element not found');
-        return;
-    }
+    if (!grid) return;
     
     try {
         const classData = APP_STATE.groupsData[className];
-        if (!classData) {
+        if (!classData || Object.keys(classData).length === 0) {
             grid.innerHTML = `
                 <div class="no-data">
                     <i class="fas fa-search"></i>
-                    <p>No jungle tribes found for ${className}</p>
-                    <button class="premium-btn" onclick="initializeSystemData()" style="margin-top: 1rem;">
-                        <i class="fas fa-database"></i>
-                        Initialize Data
-                    </button>
+                    <h3>No Jungle Tribes Found</h3>
+                    <p>No data found for ${className}. The jungle is quiet...</p>
+                    ${APP_STATE.isAdmin ? `
+                        <button class="premium-btn" onclick="initializeSystemData()" style="margin-top: 1rem;">
+                            <i class="fas fa-database"></i>
+                            Initialize Data
+                        </button>
+                    ` : ''}
                 </div>
             `;
             return;
@@ -279,88 +374,274 @@ function renderPremiumDashboard(className) {
         allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
         
         let html = '';
-        allGroups.forEach((group, index) => {
-            const rank = index + 1;
-            const mascot = group.name.split(' ')[0];
-            const progress = Math.min((group.totalPoints || 0) % 100, 100);
-            const rankClass = rank <= 3 ? `rank-${rank}` : '';
-            
-            html += `
-                <div class="group-card ${rankClass}">
-                    <div class="group-header">
-                        <div class="group-mascot">${mascot}</div>
-                        <div class="group-info">
-                            <h3 class="group-name">${group.name}</h3>
-                            <div class="group-level">${group.level}</div>
-                            ${rank <= 3 ? `
-                                <div class="group-rank">
-                                    <i class="fas fa-trophy"></i>
-                                    #${rank}
-                                </div>
-                            ` : ''}
-                        </div>
-                        <div class="group-points">
-                            <div class="points-display">${group.totalPoints}</div>
-                            <div class="points-label">Crystals</div>
-                        </div>
-                    </div>
-                    
-                    <div class="group-members-preview">
-                        <h4><i class="fas fa-users"></i> Top Adventurers</h4>
-                        <div class="members-list">
-                            ${group.members
-                                .sort((a, b) => b.points - a.points)
-                                .slice(0, 3)
-                                .map(member => `
-                                    <div class="member-preview">
-                                        <span class="member-name">${getDisplayName(member.name)}</span>
-                                        <span class="member-points">
-                                            <i class="fas fa-gem"></i>
-                                            ${member.points}
-                                        </span>
-                                    </div>
-                                `).join('')}
-                        </div>
-                    </div>
-                    
-                    <div class="group-actions">
-                        <button class="premium-btn outline" onclick="openGroupModal('${group.name}', '${className}')">
-                            <i class="fas fa-eye"></i>
-                            View Tribe
-                        </button>
-                        ${APP_STATE.isAdmin ? `
-                            <button class="premium-btn" onclick="applyGroupBonus('${group.name}', '${className}')">
-                                <i class="fas fa-star"></i>
-                                Team Bonus
-                            </button>
-                        ` : ''}
-                    </div>
-                    
-                    <div class="group-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progress}%"></div>
-                        </div>
-                        <div class="progress-text">${group.totalPoints} crystals collected</div>
-                    </div>
+        
+        if (allGroups.length === 0) {
+            html = `
+                <div class="no-data">
+                    <i class="fas fa-users"></i>
+                    <p>No groups found in ${className}</p>
                 </div>
             `;
-        });
+        } else {
+            allGroups.forEach((group, index) => {
+                const rank = index + 1;
+                const mascot = group.name.split(' ')[0];
+                const progress = Math.min((group.totalPoints || 0) % 100, 100);
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                
+                html += `
+                    <div class="group-card ${rankClass}">
+                        <div class="group-header">
+                            <div class="group-mascot">${mascot}</div>
+                            <div class="group-info">
+                                <h3 class="group-name">${group.name}</h3>
+                                <div class="group-level">${group.level}</div>
+                                ${rank <= 3 ? `
+                                    <div class="group-rank">
+                                        <i class="fas fa-trophy"></i>
+                                        #${rank}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="group-points">
+                                <div class="points-display">${group.totalPoints}</div>
+                                <div class="points-label">Crystals</div>
+                            </div>
+                        </div>
+                        
+                        <div class="group-members-preview">
+                            <h4><i class="fas fa-users"></i> Top Adventurers</h4>
+                            <div class="members-list">
+                                ${group.members
+                                    .sort((a, b) => b.points - a.points)
+                                    .slice(0, 3)
+                                    .map(member => `
+                                        <div class="member-preview">
+                                            <span class="member-name">${getDisplayName(member.name)}</span>
+                                            <span class="member-points">
+                                                <i class="fas fa-gem"></i>
+                                                ${member.points}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                ${group.members.length > 3 ? `
+                                    <div class="more-members">
+                                        +${group.members.length - 3} more adventurers
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="group-actions">
+                            <button class="premium-btn outline" onclick="openGroupModal('${group.name.replace(/'/g, "\\'")}', '${className}')">
+                                <i class="fas fa-eye"></i>
+                                View Tribe
+                            </button>
+                            ${APP_STATE.isAdmin ? `
+                                <button class="premium-btn" onclick="applyGroupBonus('${group.name.replace(/'/g, "\\'")}', '${className}')">
+                                    <i class="fas fa-star"></i>
+                                    Team Bonus
+                                </button>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="group-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="progress-text">${group.totalPoints} crystals collected</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
         
         grid.innerHTML = html;
         
     } catch (error) {
-        console.error('❌ Error rendering dashboard:', error);
+        console.error('Error rendering dashboard:', error);
         grid.innerHTML = `
-            <div class="error-state" style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.7);">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent);"></i>
+            <div class="error-state">
+                <i class="fas fa-exclamation-triangle"></i>
                 <p>Unable to load dashboard data</p>
-                <button class="premium-btn" onclick="loadDashboardData('${className}')" style="margin-top: 1rem;">
+                <button class="premium-btn" onclick="loadDashboardData('${className}')">
                     <i class="fas fa-redo"></i>
                     Try Again
                 </button>
             </div>
         `;
     }
+}
+
+// Leaderboard Functions
+async function loadLeaderboardData(className = 'all') {
+    try {
+        const result = await callAPI({
+            action: 'getGroups',
+            class: className === 'all' ? '' : className
+        });
+        
+        if (result.success) {
+            APP_STATE.groupsData = result.data;
+            renderLeaderboard(className);
+        }
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        APP_STATE.groupsData = getEnhancedMockData('getGroups', { class: className }).data;
+        renderLeaderboard(className);
+    }
+}
+
+function renderLeaderboard(className) {
+    const groupsContent = document.getElementById('groupsLeaderboardContent');
+    const individualsContent = document.getElementById('individualsLeaderboardContent');
+    
+    if (!groupsContent || !individualsContent) return;
+    
+    // Render Groups Leaderboard
+    const groupsData = processGroupsLeaderboard(className);
+    groupsContent.innerHTML = groupsData.length > 0 ? renderGroupsLeaderboardHTML(groupsData) : `
+        <div class="no-data">
+            <i class="fas fa-users"></i>
+            <p>No groups found</p>
+        </div>
+    `;
+    
+    // Render Individuals Leaderboard
+    const individualsData = processIndividualsLeaderboard(className);
+    individualsContent.innerHTML = individualsData.length > 0 ? renderIndividualsLeaderboardHTML(individualsData) : `
+        <div class="no-data">
+            <i class="fas fa-user"></i>
+            <p>No students found</p>
+        </div>
+    `;
+}
+
+function processGroupsLeaderboard(className) {
+    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
+    const allGroups = [];
+    
+    for (const classKey in data) {
+        for (const level in data[classKey]) {
+            for (const groupName in data[classKey][level]) {
+                const group = data[classKey][level][groupName];
+                allGroups.push({
+                    name: groupName,
+                    class: classKey,
+                    level: level,
+                    mascot: groupName.split(' ')[0],
+                    totalPoints: group.totalPoints,
+                    memberCount: group.members.length,
+                    averagePoints: Math.round(group.totalPoints / group.members.length)
+                });
+            }
+        }
+    }
+    
+    return allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
+}
+
+function processIndividualsLeaderboard(className) {
+    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
+    const allIndividuals = [];
+    
+    for (const classKey in data) {
+        for (const level in data[classKey]) {
+            for (const groupName in data[classKey][level]) {
+                const group = data[classKey][level][groupName];
+                group.members.forEach(member => {
+                    allIndividuals.push({
+                        name: member.name,
+                        class: classKey,
+                        group: groupName,
+                        level: level,
+                        mascot: groupName.split(' ')[0],
+                        points: member.points
+                    });
+                });
+            }
+        }
+    }
+    
+    return allIndividuals.sort((a, b) => b.points - a.points);
+}
+
+function renderGroupsLeaderboardHTML(groups) {
+    return `
+        <div class="leaderboard-header">
+            <span>Rank</span>
+            <span>Group</span>
+            <span>Points</span>
+        </div>
+        <div class="leaderboard-list">
+            ${groups.map((group, index) => `
+                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
+                    <div class="rank">
+                        ${index < 3 ? `
+                            <div class="rank-medal">
+                                <i class="fas fa-trophy"></i>
+                                <span>${index + 1}</span>
+                            </div>
+                        ` : `
+                            <span class="rank-number">#${index + 1}</span>
+                        `}
+                    </div>
+                    <div class="group-info">
+                        <div class="group-mascot">${group.mascot}</div>
+                        <div class="group-details">
+                            <h4 class="group-name">${group.name}</h4>
+                            <p class="group-meta">${group.class} • ${group.level}</p>
+                        </div>
+                    </div>
+                    <div class="points">
+                        <div class="points-badge">
+                            <i class="fas fa-gem"></i>
+                            ${group.totalPoints}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderIndividualsLeaderboardHTML(individuals) {
+    return `
+        <div class="leaderboard-header">
+            <span>Rank</span>
+            <span>Student</span>
+            <span>Points</span>
+        </div>
+        <div class="leaderboard-list">
+            ${individuals.map((student, index) => `
+                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
+                    <div class="rank">
+                        ${index < 3 ? `
+                            <div class="rank-medal">
+                                <i class="fas fa-trophy"></i>
+                                <span>${index + 1}</span>
+                            </div>
+                        ` : `
+                            <span class="rank-number">#${index + 1}</span>
+                        `}
+                    </div>
+                    <div class="student-info">
+                        <div class="student-avatar">${student.mascot}</div>
+                        <div class="student-details">
+                            <h4 class="student-name">${getDisplayName(student.name)}</h4>
+                            <p class="student-meta">${student.group} • ${student.class}</p>
+                        </div>
+                    </div>
+                    <div class="points">
+                        <div class="points-badge">
+                            <i class="fas fa-gem"></i>
+                            ${student.points}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 // Enhanced Group Modal
@@ -370,6 +651,8 @@ function openGroupModal(groupName, className) {
     
     // Find the group
     let targetGroup = null;
+    let targetLevel = '';
+    
     for (const level in classData) {
         if (classData[level][groupName]) {
             targetGroup = {
@@ -378,6 +661,7 @@ function openGroupModal(groupName, className) {
                 mascot: groupName.split(' ')[0],
                 ...classData[level][groupName]
             };
+            targetLevel = level;
             break;
         }
     }
@@ -404,15 +688,15 @@ function openGroupModal(groupName, className) {
                 </div>
                 ${APP_STATE.isAdmin ? `
                     <div class="member-actions">
-                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name}', 10)">
+                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name.replace(/'/g, "\\'")}', 10)">
                             <i class="fas fa-plus"></i>
                             10
                         </button>
-                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name}', 5)">
+                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name.replace(/'/g, "\\'")}', 5)">
                             <i class="fas fa-plus"></i>
                             5
                         </button>
-                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name}', 1)">
+                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name.replace(/'/g, "\\'")}', 1)">
                             <i class="fas fa-plus"></i>
                             1
                         </button>
@@ -436,7 +720,9 @@ function openGroupModal(groupName, className) {
             </div>
             <div class="members-full-list">
                 <h4><i class="fas fa-list-ol"></i> Tribe Members Ranking</h4>
-                <div class="members-table">${membersHtml}</div>
+                <div class="members-table">
+                    ${membersHtml || '<p>No members found</p>'}
+                </div>
             </div>
         </div>
     `;
@@ -446,13 +732,12 @@ function openGroupModal(groupName, className) {
     createSparkleEffect();
 }
 
-// Premium Authentication
+// Authentication functions
 async function verifyAdminPassword(password) {
     const result = await callAPI({
         action: 'verifyAdmin',
         password: password
     });
-    
     return result;
 }
 
@@ -472,7 +757,7 @@ async function getAuthToken(password) {
     return result;
 }
 
-// Premium Point Management
+// Point management functions
 async function updateStudentPoints(studentName, pointsChange) {
     if (!APP_STATE.authToken) {
         showLoginModal();
@@ -490,6 +775,8 @@ async function updateStudentPoints(studentName, pointsChange) {
         showToast(`+${pointsChange} crystals for ${getDisplayName(studentName)}! ✨`, 'success');
         createSparkleEffect();
         loadDashboardData(APP_STATE.currentClass);
+    } else {
+        showToast(`Failed to update points: ${result.error}`, 'error');
     }
     
     return result;
@@ -558,204 +845,13 @@ async function initializeSystemData() {
         showToast('System data initialized successfully! 🎉', 'success');
         loadDashboardData(APP_STATE.currentClass);
     } else {
-        showToast('Failed to initialize data', 'error');
+        showToast('Failed to initialize data: ' + result.error, 'error');
     }
     
     return result;
 }
 
-// Leaderboard Functions
-async function loadLeaderboardData(className = 'all') {
-    try {
-        const result = await callAPI({
-            action: 'getGroups',
-            class: className === 'all' ? '' : className
-        });
-        
-        if (result.success) {
-            APP_STATE.groupsData = result.data;
-            renderLeaderboard(className);
-        }
-    } catch (error) {
-        console.error('Error loading leaderboard:', error);
-        APP_STATE.groupsData = getPremiumMockData('getGroups', { class: className }).data;
-        renderLeaderboard(className);
-    }
-}
-
-function renderLeaderboard(className) {
-    const groupsContent = document.getElementById('groupsLeaderboardContent');
-    const individualsContent = document.getElementById('individualsLeaderboardContent');
-    
-    if (!groupsContent || !individualsContent) return;
-    
-    // Render Groups Leaderboard
-    const groupsData = processGroupsLeaderboard(className);
-    groupsContent.innerHTML = renderGroupsLeaderboardHTML(groupsData);
-    
-    // Render Individuals Leaderboard
-    const individualsData = processIndividualsLeaderboard(className);
-    individualsContent.innerHTML = renderIndividualsLeaderboardHTML(individualsData);
-}
-
-function processGroupsLeaderboard(className) {
-    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
-    const allGroups = [];
-    
-    for (const classKey in data) {
-        for (const level in data[classKey]) {
-            for (const groupName in data[classKey][level]) {
-                const group = data[classKey][level][groupName];
-                allGroups.push({
-                    name: groupName,
-                    class: classKey,
-                    level: level,
-                    mascot: groupName.split(' ')[0],
-                    totalPoints: group.totalPoints,
-                    memberCount: group.members.length,
-                    averagePoints: Math.round(group.totalPoints / group.members.length)
-                });
-            }
-        }
-    }
-    
-    return allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
-}
-
-function processIndividualsLeaderboard(className) {
-    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
-    const allIndividuals = [];
-    
-    for (const classKey in data) {
-        for (const level in data[classKey]) {
-            for (const groupName in data[classKey][level]) {
-                const group = data[classKey][level][groupName];
-                group.members.forEach(member => {
-                    allIndividuals.push({
-                        name: member.name,
-                        class: classKey,
-                        group: groupName,
-                        level: level,
-                        mascot: groupName.split(' ')[0],
-                        points: member.points
-                    });
-                });
-            }
-        }
-    }
-    
-    return allIndividuals.sort((a, b) => b.points - a.points);
-}
-
-function renderGroupsLeaderboardHTML(groups) {
-    if (groups.length === 0) {
-        return `
-            <div class="no-data">
-                <i class="fas fa-users"></i>
-                <p>No groups found</p>
-            </div>
-        `;
-    }
-    
-    return `
-        <div class="leaderboard-header">
-            <span>Rank</span>
-            <span>Group</span>
-            <span>Points</span>
-        </div>
-        <div class="leaderboard-list">
-            ${groups.map((group, index) => `
-                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
-                    <div class="rank">
-                        ${index < 3 ? `
-                            <div class="rank-medal">
-                                <i class="fas fa-trophy"></i>
-                                <span>${index + 1}</span>
-                            </div>
-                        ` : `
-                            <span class="rank-number">#${index + 1}</span>
-                        `}
-                    </div>
-                    <div class="group-info">
-                        <div class="group-mascot">${group.mascot}</div>
-                        <div class="group-details">
-                            <h4 class="group-name">${group.name}</h4>
-                            <p class="group-meta">${group.class} • ${group.level}</p>
-                        </div>
-                    </div>
-                    <div class="points">
-                        <div class="points-badge">
-                            <i class="fas fa-gem"></i>
-                            ${group.totalPoints}
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderIndividualsLeaderboardHTML(individuals) {
-    if (individuals.length === 0) {
-        return `
-            <div class="no-data">
-                <i class="fas fa-user"></i>
-                <p>No students found</p>
-            </div>
-        `;
-    }
-    
-    return `
-        <div class="leaderboard-header">
-            <span>Rank</span>
-            <span>Student</span>
-            <span>Points</span>
-        </div>
-        <div class="leaderboard-list">
-            ${individuals.map((student, index) => `
-                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
-                    <div class="rank">
-                        ${index < 3 ? `
-                            <div class="rank-medal">
-                                <i class="fas fa-trophy"></i>
-                                <span>${index + 1}</span>
-                            </div>
-                        ` : `
-                            <span class="rank-number">#${index + 1}</span>
-                        `}
-                    </div>
-                    <div class="student-info">
-                        <div class="student-avatar">${student.mascot}</div>
-                        <div class="student-details">
-                            <h4 class="student-name">${getDisplayName(student.name)}</h4>
-                            <p class="student-meta">${student.group} • ${student.class}</p>
-                        </div>
-                    </div>
-                    <div class="points">
-                        <div class="points-badge">
-                            <i class="fas fa-gem"></i>
-                            ${student.points}
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function switchLeaderboardTab(tabName) {
-    // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabName);
-    });
-    
-    // Update tab content
-    document.querySelectorAll('.leaderboard-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.id === tabName + 'Leaderboard');
-    });
-}
-
-// Premium UI Management
+// UI Management functions
 function switchView(viewType) {
     APP_STATE.currentView = viewType;
     
@@ -795,7 +891,6 @@ function updateUIForAuth() {
     }
 }
 
-// Premium Modal Management
 function showLoginModal() {
     const modal = document.getElementById('loginModal');
     const passwordInput = document.getElementById('adminPassword');
@@ -826,6 +921,7 @@ function showLoginModal() {
             createSparkleEffect();
         } else {
             showToast('Incorrect magical password! ❌', 'error');
+            passwordInput.focus();
         }
     };
     
@@ -843,7 +939,7 @@ function showLoginModal() {
     passwordInput.focus();
 }
 
-// Premium Page Navigation
+// Page Navigation
 function switchPage(pageName) {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
@@ -866,6 +962,16 @@ function switchPage(pageName) {
     }
     
     createSparkleEffect();
+}
+
+function switchLeaderboardTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    
+    document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.id === tabName + 'Leaderboard');
+    });
 }
 
 function updateSystemStats() {
@@ -907,7 +1013,7 @@ function updateSystemStats() {
     `;
 }
 
-// Premium Utility Functions
+// Utility functions
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
@@ -975,7 +1081,6 @@ function createConfettiEffect() {
     }
 }
 
-// Check for stored authentication
 function checkStoredAuth() {
     const storedToken = localStorage.getItem('jungleAuthToken');
     const tokenTime = localStorage.getItem('jungleTokenTime');
@@ -997,7 +1102,7 @@ function checkStoredAuth() {
     }
 }
 
-// Premium Event Listeners
+// Event Listeners
 function setupPremiumEventListeners() {
     // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -1109,7 +1214,7 @@ function setupPremiumEventListeners() {
     });
 }
 
-// Safety timeout to ensure loading screen doesn't get stuck
+// Initialize app
 let loadingTimeout = setTimeout(() => {
     if (APP_STATE.isLoading) {
         console.warn('⚠️ Loading timeout reached, forcing app display');
@@ -1117,22 +1222,19 @@ let loadingTimeout = setTimeout(() => {
         showToast('App loaded successfully! 🎉', 'success');
         APP_STATE.isLoading = false;
     }
-}, 10000); // 10 second timeout
+}, 10000);
 
-// Clear timeout when app loads successfully
 function clearLoadingTimeout() {
     if (loadingTimeout) {
         clearTimeout(loadingTimeout);
     }
 }
 
-// Update the initialization to clear timeout
 async function safeInitializeApp() {
     await initializePremiumApp();
     clearLoadingTimeout();
 }
 
-// Make sure the app initializes when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', safeInitializeApp);
 } else {

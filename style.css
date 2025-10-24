@@ -76,11 +76,11 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   padding: 2rem;
 }
 
-/* Glass Morphism Logo Container */
+/* Enhanced Glass Morphism Logo Container */
 .premium-logo {
   margin-bottom: 3rem;
   background: var(--glass-bg);
@@ -92,9 +92,9 @@ body {
   box-shadow: var(--glass-shadow);
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
-/* Animated gradient background for glass effect */
 .premium-logo::before {
   content: '';
   position: absolute;
@@ -114,7 +114,7 @@ body {
 
 .logo-icon {
   font-size: 4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   background: var(--gradient-premium);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -123,27 +123,32 @@ body {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
+/* ENHANCED: Single line title with better typography */
 .premium-logo h1 {
-  font-size: 3.5rem;
+  font-size: 4rem;
   margin-bottom: 0.5rem;
   background: var(--gradient-premium);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .logo-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   opacity: 0.9;
   font-weight: 400;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   color: rgba(255, 255, 255, 0.8);
   text-align: center;
+  margin-top: 0.5rem;
 }
 
 /* Glass Morphism Loading Animation */
@@ -250,7 +255,6 @@ body {
   overflow: hidden;
 }
 
-/* Animated shine effect on progress bar */
 .progress-fill::after {
   content: '';
   position: absolute;
@@ -268,7 +272,7 @@ body {
 }
 
 .loading-text {
-  font-size: 1rem;
+  font-size: 1.1rem;
   opacity: 0.8;
   animation: pulse 2s ease-in-out infinite;
   color: rgba(255, 255, 255, 0.9);
@@ -442,6 +446,7 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
 }
 
 .brand-subtitle {
@@ -726,11 +731,19 @@ body {
   box-shadow: var(--glow-primary);
 }
 
+/* ENHANCED: Better hero title with single line emphasis */
 .hero-title {
-  font-size: 4rem;
+  font-size: 3.5rem;
   margin-bottom: 1.5rem;
   font-weight: 800;
   line-height: 1.1;
+  background: var(--gradient-premium);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .gradient-text {
@@ -1110,7 +1123,7 @@ body {
   background: var(--gradient-secondary);
 }
 
-/* Enhanced Group Cards */
+/* ENHANCED: Better Group Cards with improved points display */
 .groups-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -1164,10 +1177,12 @@ body {
   animation: bounce 3s ease-in-out infinite;
   backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
+  flex-shrink: 0;
 }
 
 .group-info {
   flex: 1;
+  min-width: 0;
 }
 
 .group-name {
@@ -1175,6 +1190,9 @@ body {
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: var(--light-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .group-level {
@@ -1200,8 +1218,11 @@ body {
   gap: 0.25rem;
 }
 
+/* ENHANCED: Better points display that handles large numbers */
 .group-points {
   text-align: center;
+  flex-shrink: 0;
+  min-width: 80px;
 }
 
 .points-display {
@@ -1211,12 +1232,22 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  max-width: 120px;
+  transition: all 0.3s ease;
 }
+
+.points-display[data-points="100"] { font-size: 2.1rem; }
+.points-display[data-points="1000"] { font-size: 1.9rem; }
+.points-display[data-points="10000"] { font-size: 1.7rem; }
 
 .points-label {
   font-size: 0.8rem;
   opacity: 0.8;
   margin-top: 0.25rem;
+  white-space: nowrap;
 }
 
 .group-members-preview {
@@ -1258,6 +1289,10 @@ body {
   font-weight: 600;
   color: var(--light-1);
   font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .member-points {
@@ -1267,6 +1302,17 @@ body {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.more-members {
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .group-actions {
@@ -1474,10 +1520,12 @@ body {
   justify-content: center;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  flex-shrink: 0;
 }
 
 .group-details, .student-details {
   flex: 1;
+  min-width: 0;
 }
 
 .group-name, .student-name {
@@ -1485,12 +1533,18 @@ body {
   font-weight: 600;
   margin: 0 0 0.25rem 0;
   font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .group-meta, .student-meta {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.85rem;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .points {
@@ -1508,6 +1562,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   box-shadow: var(--glow-primary);
+  white-space: nowrap;
 }
 
 .loading-leaderboard {
@@ -1626,12 +1681,21 @@ body {
 .modal-mascot {
   font-size: 4rem;
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  flex-shrink: 0;
+}
+
+.modal-group-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .modal-group-info h3 {
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
   color: var(--light-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .modal-group-info p {
@@ -1690,11 +1754,13 @@ body {
   font-size: 0.9rem;
   font-weight: 600;
   color: white;
+  flex-shrink: 0;
 }
 
 .member-info {
   flex: 1;
   margin-left: 1rem;
+  min-width: 0;
 }
 
 .member-name {
@@ -1703,6 +1769,9 @@ body {
   color: var(--light-1);
   display: block;
   margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .member-points {
@@ -1712,11 +1781,13 @@ body {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-shrink: 0;
 }
 
 .member-actions {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .top-member {
@@ -1814,17 +1885,22 @@ body {
   justify-content: center;
   font-size: 1.2rem;
   background: var(--gradient-primary);
+  flex-shrink: 0;
 }
 
 .activity-details {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .activity-text {
   font-weight: 500;
   color: var(--light-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .activity-time {
@@ -2159,6 +2235,10 @@ body {
   .group-meta, .student-meta {
     font-size: 0.75rem;
   }
+  
+  .points-display {
+    font-size: 1.8rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2190,5 +2270,9 @@ body {
   
   .section-title {
     font-size: 2rem;
+  }
+  
+  .points-display {
+    font-size: 1.6rem;
   }
 }

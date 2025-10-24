@@ -1,1289 +1,1270 @@
-// 🌟 Premium Jungle × Magical - Complete Frontend Logic
+// 🌟 PROFESSIONAL Jungle × Magical System - Enhanced JavaScript
+// Apple/Google-inspired UX with Samsung/Windows 11 touches
 
-// API URL - Use your deployed web app URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwLnoJbfQDNmJaVoNkL8XbLkAKSem9-bVHrraMZcMR6ptVjZNDMl57qmqDHxXuVXibg/exec';
-
-// Premium Application State
-const APP_STATE = {
-    currentUser: null,
-    isAdmin: false,
-    currentClass: '4 Pearl',
-    authToken: null,
-    currentView: 'visitor',
-    groupsData: {},
-    premiumFeatures: true,
-    isLoading: true
-};
-
-// Enhanced Malaysian Name Display
-function getDisplayName(malaysianName) {
-    if (!malaysianName) return '';
-    
-    // Remove common suffixes and prefixes, keep the meaningful parts
-    const name = malaysianName
-        .replace(/BIN\s+/gi, '')
-        .replace(/BINTI\s+/gi, '')
-        .replace(/BINTE\s+/gi, '')
-        .replace(/ANAK\s+/gi, '')
-        .trim();
-    
-    // Take first 2-3 words for better identification
-    const words = name.split(' ').filter(word => word.length > 0);
-    if (words.length >= 3) {
-        return words.slice(0, 3).join(' ');
-    } else if (words.length === 2) {
-        return words.join(' ');
-    } else {
-        return words[0] || malaysianName;
-    }
-}
-
-// Premium API Communication with better error handling
-async function callAPI(params = {}) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-    
-    try {
-        const urlParams = new URLSearchParams(params);
-        console.log('🔄 Calling API:', params.action, 'with params:', params);
+class JungleRewardsSystem {
+    constructor() {
+        this.currentView = 'visitor';
+        this.currentPage = 'home';
+        this.currentClass = '4 Pearl';
+        this.isAuthenticated = false;
+        this.adminToken = null;
+        this.groupsData = null;
+        this.leaderboardData = null;
         
-        const response = await fetch(`${API_URL}?${urlParams}`, {
-            method: 'GET',
-            signal: controller.signal
+        this.API_BASE = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.initializeApp();
+        this.setupResponsiveHandlers();
+    }
+
+    bindEvents() {
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = e.currentTarget.getAttribute('data-page');
+                this.navigateToPage(page);
+            });
         });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('✅ API Response received:', data);
-        return data;
-        
-    } catch (error) {
-        console.error('❌ API Call failed:', error);
-        clearTimeout(timeoutId);
-        
-        // Return enhanced mock data for development
-        return getEnhancedMockData(params.action, params);
-    }
-}
 
-// Enhanced Mock Data with ALL your students
-function getEnhancedMockData(action, params) {
-    console.log('🔄 Using enhanced mock data for:', action);
-    
-    const mockGroups = {
-        "4 Pearl": {
-            "Pre-A1": {
-                "🐯 The Mighty Tigers": {
-                    totalPoints: 245,
-                    members: [
-                        { name: "ADELLA KAISARA BINTI AMDAN", points: 65 },
-                        { name: "AHMAD JIHAD BIN ABDULLAH", points: 58 },
-                        { name: "ANJENNY PAILEE", points: 72 },
-                        { name: "AZIZAH ALISHA BINTI AZMIZAN AZRIN", points: 35 },
-                        { name: "AZIB ARYAN BIN A.RAHMAN", points: 15 }
-                    ]
-                },
-                "🐼 The Brave Bears": {
-                    totalPoints: 198,
-                    members: [
-                        { name: "GIDEON GALE GARRY", points: 45 },
-                        { name: "FAREL BIN ARSID", points: 52 },
-                        { name: "INDRA PUTRA BIN JAINI", points: 38 },
-                        { name: "MOHAMMAD ABDUL KHALIQ BIN NAISAR", points: 33 },
-                        { name: "MOHAMAD NUR ZAQIF ZIQRI BIN MOHAMAD TINO", points: 30 }
-                    ]
-                },
-                "🐰 The Swift Rabbits": {
-                    totalPoints: 215,
-                    members: [
-                        { name: "MUHAMMAD DANISH IFWAT BIN MUHAMMAD IFFAD", points: 55 },
-                        { name: "MOHAMAD AL HAKIM BIN MOHAMAD RAJAN", points: 48 },
-                        { name: "MOHAMAD RAID RUZAIMIE BIN MOHD SALIHAN", points: 42 },
-                        { name: "NUR AIN HAWA SYAKIELA BINTI ILHAM SUKRI", points: 35 },
-                        { name: "MUHAMMAD IRMANSYAH BIN ABDUL BASIR", points: 35 }
-                    ]
-                }
-            },
-            "Low A1": {
-                "🦊 The Clever Foxes": {
-                    totalPoints: 180,
-                    members: [
-                        { name: "MUHAMMAD YUSUF BIN ANNUAR", points: 45 },
-                        { name: "NOR ZAMIRAH QALISYAH BINTI MOHD ZAMIRUL", points: 40 },
-                        { name: "MUHAMMAD RAYYAN BIN ARNER", points: 35 },
-                        { name: "MUHAMMAD AKIF QAIYYUM BIN RANO", points: 32 },
-                        { name: "MUHAMMAD ASNAWI BIN HAMZAH", points: 28 }
-                    ]
-                }
-            },
-            "Mid A1": {
-                "🦅 The Brave Eagles": {
-                    totalPoints: 225,
-                    members: [
-                        { name: "NOOR QASEH NADIA BINTI ABDULLAH", points: 60 },
-                        { name: "MIESYA NUR SYAZIERRA BINTI ISA", points: 55 },
-                        { name: "MOHAMAD WAN MARZUQI BIN MAZLAN", points: 45 },
-                        { name: "NOR FATIYYAH FARAHANIE BINTI ZAINI", points: 35 },
-                        { name: "MUHAMMAD NAZRIN BIN ZULLASRI", points: 30 }
-                    ]
-                },
-                "🐆 The Swift Panthers": {
-                    totalPoints: 195,
-                    members: [
-                        { name: "MUHAMMAD AL FATIH BIN MOHAMAD FAIZAL AFINDI", points: 50 },
-                        { name: "NUBHAN BIN JAMIL", points: 45 },
-                        { name: "NURUL FARAH KHALISYAH BINTI PABIL", points: 40 },
-                        { name: "NURUL ALISA SAPPIKA BINTI ABDULLAH", points: 35 },
-                        { name: "MUHAMMAD FAIS BIN HENRAL", points: 25 }
-                    ]
-                }
-            },
-            "High A1": {
-                "🦋 The Shining Butterflies": {
-                    totalPoints: 268,
-                    members: [
-                        { name: "PUTRI ARIESA ZULAIKHA BINTI JUISAL", points: 65 },
-                        { name: "PUTERI MYA ARLISSA BINTI MOHD BAKRI", points: 58 },
-                        { name: "MUHAMMAD IRFAN BIN UDAYKUMAR CHOCKALINGAM SHANMUGAM", points: 50 },
-                        { name: "MUHAMMAD IKMAL BIN RIDSMAR", points: 45 },
-                        { name: "SYARIF ABDUL HALIM BIN ALNASIR", points: 35 },
-                        { name: "SITI NUR PUTRI BALQISHAH BINTI MOHD ZALANI", points: 15 }
-                    ]
-                }
-            }
-        },
-        "4 Crystal": {
-            "Pre-A1": {
-                "🐒 The Playful Monkeys": {
-                    totalPoints: 312,
-                    members: [
-                        { name: "ASHIRAH BINTI ASIS", points: 75 },
-                        { name: "AIDIL FAZLI BIN ABDULLAH", points: 68 },
-                        { name: "AL SYAMIR BIN ABDUL NASIR", points: 55 },
-                        { name: "ELYANA BINTI MARTIN", points: 45 },
-                        { name: "HAFIZAM AKIM BIN ABDUL AZIS", points: 35 },
-                        { name: "HAIJAL BIN JAINAL", points: 18 },
-                        { name: "IMANINA HUSNA BINTI MUHAMMAD SALI", points: 16 },
-                        { name: "MOHAMMAD HAIKAL HAKIMI BIN ABDULLAH", points: 0 },
-                        { name: "MOHAMMAD AIREIL DANNISH BIN ASYRAT", points: 0 }
-                    ]
-                },
-                "🦉 The Wise Owls": {
-                    totalPoints: 285,
-                    members: [
-                        { name: "MOHAMED DANIEL IMAN BIN BOHARI", points: 65 },
-                        { name: "MOHAMAD RAIDI SAHRIMAL BIN JAMRI", points: 58 },
-                        { name: "MUHAMAD AZRUL BIN AZLAN", points: 52 },
-                        { name: "MUHAMMAD NOOR FAZRIE BIN AMRAN", points: 45 },
-                        { name: "NUR ARYSA QAISARA BINTI MASRI", points: 35 },
-                        { name: "NAEL BIN MOHD NIJAR", points: 15 },
-                        { name: "NIRWANSA BIN RANO", points: 10 },
-                        { name: "NORAINA BINTI ABDULLAH", points: 5 }
-                    ]
-                },
-                "🐺 The Fearless Wolves": {
-                    totalPoints: 275,
-                    members: [
-                        { name: "NUR PATIAH BINTI ABDULLAH", points: 62 },
-                        { name: "NUR KHATIJA BINTI IBRAHIM", points: 55 },
-                        { name: "NURUL HUMAIRA BINTI ASANAL", points: 48 },
-                        { name: "NAISHA BINTI AZMAN", points: 42 },
-                        { name: "NUR AFFINA AULIA BINTI RIZAL", points: 35 },
-                        { name: "MUHAMMAD DANNY ASHRAF BIN ABDULLAH", points: 18 },
-                        { name: "MUHAMMAD AADAM KHALIF BIN MUHAMMAD HAIRUL NIZAM", points: 10 },
-                        { name: "NURAISYAH NATASYA BINTI MOHD HANIF WASNI", points: 5 }
-                    ]
-                },
-                "🦁 The Glorious Lions": {
-                    totalPoints: 325,
-                    members: [
-                        { name: "NURAZLIYANAH BATRISHA BINTI SABRI", points: 75 },
-                        { name: "MOHAMAD RIZANI SYAHIZIEY BIN ABDULLAH", points: 68 },
-                        { name: "MUHAMMAD HAIZUL BIN OMAR", points: 60 },
-                        { name: "MUHAMMAD QAWIEM RAFIQ BIN RAZLAN", points: 52 },
-                        { name: "NUR AZMINA BINTI ABDULLAH", points: 45 },
-                        { name: "MOHAMMAD SHAZWAN BIN NAZMI", points: 15 },
-                        { name: "NURUL ALYA ZULAIKHA BINTI SINAKASONI", points: 5 },
-                        { name: "NURLUTHFIA AZZAHRA BINTI JUWAWI", points: 3 },
-                        { name: "SITI UMAIRAH BINTI IBRAHIM", points: 2 },
-                        { name: "WHIRYAN SHAH BIN MOHD NORHISMAL", points: 0 },
-                        { name: "MUHAMMAD HAFIZ UQASYAH BIN ABDULLAH", points: 0 }
-                    ]
-                }
-            }
-        }
-    };
-
-    switch(action) {
-        case 'getGroups':
-            const classData = params.class ? { [params.class]: mockGroups[params.class] } : mockGroups;
-            return {
-                success: true,
-                data: classData,
-                premium: true,
-                timestamp: new Date().toISOString(),
-                isMockData: true
-            };
-        case 'verifyAdmin':
-            return { 
-                success: params.password === 'jungle123',
-                premium: true 
-            };
-        case 'getToken':
-            if (params.password === 'jungle123') {
-                return {
-                    success: true,
-                    token: 'premium-mock-token-' + Date.now(),
-                    expiresIn: 3600,
-                    premium: true
-                };
-            }
-            return { success: false, error: 'Invalid password' };
-        case 'initializeData':
-            return {
-                success: true,
-                message: "Mock data initialized successfully",
-                totalStudents: 72,
-                premium: true
-            };
-        default:
-            return { 
-                success: true, 
-                message: 'Premium mock response',
-                premium: true 
-            };
-    }
-}
-
-// Enhanced points display with dynamic sizing
-function updatePointsDisplay() {
-    document.querySelectorAll('.points-display').forEach(display => {
-        const points = parseInt(display.textContent) || 0;
-        
-        // Add data attribute for CSS targeting
-        display.setAttribute('data-points', points);
-        
-        // Dynamic class based on digit count
-        const digitCount = points.toString().length;
-        display.className = 'points-display';
-        
-        if (digitCount >= 4) {
-            display.classList.add('points-large');
-        } else if (digitCount === 3) {
-            display.classList.add('points-medium');
-        }
-    });
-}
-
-// Enhanced initialization
-async function initializePremiumApp() {
-    console.log('🚀 Initializing Premium Jungle App...');
-    
-    showLoadingScreen();
-    checkStoredAuth();
-    setupPremiumEventListeners();
-    updateUIForAuth();
-    
-    try {
-        await loadDashboardData(APP_STATE.currentClass);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-    } catch (error) {
-        console.error('Initialization error:', error);
-        showToast('Welcome to Jungle × Magical! 🎉', 'success');
-    } finally {
-        setTimeout(() => {
-            hideLoadingScreen();
-            showToast('Welcome to the Enchanted Jungle! 🌟✨', 'success');
-            createSparkleEffect();
-            APP_STATE.isLoading = false;
-            
-            // Initialize points display
-            updatePointsDisplay();
-        }, 2500);
-    }
-}
-
-// Loading screen functions
-function showLoadingScreen() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    const app = document.getElementById('app');
-    if (loadingScreen) loadingScreen.classList.remove('hidden');
-    if (app) app.classList.add('hidden');
-}
-
-function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    const app = document.getElementById('app');
-    if (loadingScreen) loadingScreen.classList.add('hidden');
-    if (app) app.classList.remove('hidden');
-}
-
-// Premium Data Loading
-async function loadDashboardData(className = APP_STATE.currentClass) {
-    try {
-        showToast('Loading jungle data...', 'info');
-        
-        const result = await callAPI({
-            action: 'getGroups',
-            class: className
+        // View Toggle
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const view = e.currentTarget.getAttribute('data-view');
+                this.switchView(view);
+            });
         });
-        
-        if (result.success) {
-            APP_STATE.groupsData = result.data;
-            renderPremiumDashboard(className);
-            updateLastUpdated();
-            
-            if (result.isMockData) {
-                showToast('Using demo data - All 72 students loaded! 🎉', 'info');
-            } else {
-                showToast('Real data loaded successfully! ✅', 'success');
+
+        // Class Selectors
+        document.getElementById('classSelector').addEventListener('change', (e) => {
+            this.currentClass = e.target.value;
+            this.updateClassDisplay();
+            this.loadDashboardData();
+        });
+
+        document.getElementById('leaderboardClassSelector').addEventListener('change', (e) => {
+            this.loadLeaderboardData(e.target.value);
+        });
+
+        // Tab Buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tab = e.currentTarget.getAttribute('data-tab');
+                this.switchTab(tab);
+            });
+        });
+
+        // Authentication
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            this.showLoginModal();
+        });
+
+        document.getElementById('submitLogin').addEventListener('click', () => {
+            this.handleLogin();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            this.handleLogout();
+        });
+
+        document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.handleLogin();
             }
+        });
+
+        // Data Management
+        document.getElementById('refreshData').addEventListener('click', () => {
+            this.loadDashboardData();
+        });
+
+        document.getElementById('resetAllPoints').addEventListener('click', () => {
+            this.resetAllPoints();
+        });
+
+        // Modal Handling
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.closeModal(e.target.closest('.modal'));
+            });
+        });
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeModal(modal);
+                }
+            });
+        });
+
+        // Hero CTA Buttons
+        document.querySelectorAll('.hero-cta[data-page]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const page = e.currentTarget.getAttribute('data-page');
+                this.navigateToPage(page);
+            });
+        });
+    }
+
+    setupResponsiveHandlers() {
+        // Handle window resize for responsive adjustments
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.handleResize();
+            }, 250);
+        });
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.handleResize();
+            }, 300);
+        });
+    }
+
+    handleResize() {
+        // Adjust layout elements based on screen size
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            document.body.classList.add('mobile-view');
         } else {
-            throw new Error(result.error || 'Failed to load data');
+            document.body.classList.remove('mobile-view');
         }
-        
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        showToast('Using enhanced demo data with all students 📊', 'info');
-        
-        APP_STATE.groupsData = getEnhancedMockData('getGroups', { class: className }).data;
-        renderPremiumDashboard(className);
-        updateLastUpdated();
-    }
-}
 
-// Premium Dashboard Rendering
-function renderPremiumDashboard(className) {
-    const grid = document.getElementById('groupsGrid');
-    if (!grid) return;
-    
-    try {
-        const classData = APP_STATE.groupsData[className];
-        if (!classData || Object.keys(classData).length === 0) {
-            grid.innerHTML = `
-                <div class="no-data">
-                    <i class="fas fa-search"></i>
-                    <h3>No Jungle Tribes Found</h3>
-                    <p>No data found for ${className}. The jungle is quiet...</p>
-                    ${APP_STATE.isAdmin ? `
-                        <button class="premium-btn" onclick="initializeSystemData()" style="margin-top: 1rem;">
-                            <i class="fas fa-database"></i>
-                            Initialize Data
+        // Update any dynamic layout elements
+        this.updateResponsiveElements();
+    }
+
+    updateResponsiveElements() {
+        // Update font sizes or layouts that need dynamic adjustment
+        const titleElements = document.querySelectorAll('.hero-title, .page-title');
+        titleElements.forEach(title => {
+            if (title.scrollWidth > title.clientWidth) {
+                title.style.fontSize = 'clamp(1.8rem, 6vw, 3rem)';
+            }
+        });
+    }
+
+    async initializeApp() {
+        try {
+            // Show loading screen
+            this.showLoadingScreen();
+
+            // Simulate loading process
+            await this.simulateLoading();
+            
+            // Initialize data
+            await this.loadInitialData();
+            
+            // Hide loading screen and show app
+            this.hideLoadingScreen();
+            this.showApp();
+            
+            // Load initial page data
+            this.loadDashboardData();
+            this.loadLeaderboardData('all');
+            
+        } catch (error) {
+            console.error('Error initializing app:', error);
+            this.showToast('Failed to initialize application', 'error');
+            this.hideLoadingScreen();
+            this.showApp();
+        }
+    }
+
+    simulateLoading() {
+        return new Promise((resolve) => {
+            const progressBar = document.querySelector('.progress-fill');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    resolve();
+                }
+                
+                if (progressBar) {
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 200);
+        });
+    }
+
+    showLoadingScreen() {
+        document.getElementById('loadingScreen').classList.remove('hidden');
+        document.getElementById('app').classList.add('hidden');
+    }
+
+    hideLoadingScreen() {
+        document.getElementById('loadingScreen').classList.add('hidden');
+    }
+
+    showApp() {
+        document.getElementById('app').classList.remove('hidden');
+        this.createParticles();
+    }
+
+    async loadInitialData() {
+        try {
+            // Load groups data
+            const groupsResponse = await this.fetchData('getGroups', { class: this.currentClass });
+            if (groupsResponse.success) {
+                this.groupsData = groupsResponse.data;
+            }
+
+            // Load leaderboard data
+            const leaderboardResponse = await this.fetchData('getGroups', { class: 'all' });
+            if (leaderboardResponse.success) {
+                this.leaderboardData = leaderboardResponse.data;
+            }
+
+        } catch (error) {
+            console.error('Error loading initial data:', error);
+            throw error;
+        }
+    }
+
+    navigateToPage(page) {
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(pageEl => {
+            pageEl.classList.remove('active');
+        });
+
+        // Show target page
+        document.getElementById(`${page}Page`).classList.add('active');
+        this.currentPage = page;
+
+        // Load page-specific data
+        this.loadPageData(page);
+
+        // Close any open modals
+        this.closeAllModals();
+
+        // Add page transition effects
+        this.animatePageTransition();
+    }
+
+    animatePageTransition() {
+        const activePage = document.querySelector('.page.active');
+        if (activePage) {
+            activePage.style.animation = 'none';
+            setTimeout(() => {
+                activePage.style.animation = 'fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            }, 10);
+        }
+    }
+
+    loadPageData(page) {
+        switch (page) {
+            case 'dashboard':
+                this.loadDashboardData();
+                break;
+            case 'leaderboard':
+                this.loadLeaderboardData('all');
+                break;
+            case 'admin':
+                if (this.isAuthenticated) {
+                    this.loadAdminData();
+                }
+                break;
+        }
+    }
+
+    async loadDashboardData() {
+        const groupsGrid = document.getElementById('groupsGrid');
+        if (!groupsGrid) return;
+
+        // Show loading state
+        groupsGrid.innerHTML = `
+            <div class="loading-groups">
+                <i class="fas fa-spinner"></i>
+                <p>Discovering jungle tribes...</p>
+            </div>
+        `;
+
+        try {
+            const response = await this.fetchData('getGroups', { class: this.currentClass });
+            
+            if (response.success) {
+                this.groupsData = response.data;
+                this.renderGroupsGrid(response.data);
+                this.updateLastUpdated();
+            } else {
+                throw new Error(response.error || 'Failed to load groups data');
+            }
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            groupsGrid.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Failed to load groups data</p>
+                    <button class="premium-btn small" onclick="app.loadDashboardData()">
+                        <i class="fas fa-redo"></i>
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    renderGroupsGrid(data) {
+        const groupsGrid = document.getElementById('groupsGrid');
+        if (!groupsGrid) return;
+
+        // Flatten groups data for sorting
+        const allGroups = [];
+        for (const className in data) {
+            for (const level in data[className]) {
+                for (const groupName in data[className][level]) {
+                    const group = data[className][level][groupName];
+                    allGroups.push({
+                        className,
+                        level,
+                        groupName,
+                        ...group
+                    });
+                }
+            }
+        }
+
+        // Sort groups by points
+        allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
+
+        // Render groups
+        groupsGrid.innerHTML = allGroups.map((group, index) => {
+            const rank = index + 1;
+            const rankClass = rank <= 3 ? `rank-${rank}` : '';
+            const membersToShow = group.members.slice(0, 3);
+            const hasMoreMembers = group.members.length > 3;
+
+            return `
+                <div class="group-card ${rankClass}" data-group="${group.groupName}" data-class="${group.className}">
+                    <div class="group-header">
+                        <div class="group-mascot">
+                            ${this.getGroupEmoji(group.groupName)}
+                        </div>
+                        <div class="group-info">
+                            <div class="group-name-row">
+                                <h3 class="group-name" title="${group.groupName}">${group.groupName}</h3>
+                                <span class="group-rank">
+                                    <i class="fas fa-trophy"></i>
+                                    #${rank}
+                                </span>
+                            </div>
+                            <div class="group-meta-row">
+                                <span class="group-level">${group.level}</span>
+                                <span class="group-class">${group.className}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group-points-section">
+                        <div class="points-display-container">
+                            <div class="points-display" data-points="${group.totalPoints}">
+                                ${this.formatPoints(group.totalPoints)}
+                            </div>
+                            <div class="points-label">Crystals</div>
+                        </div>
+                        <div class="group-progress">
+                            <div class="progress-info">
+                                <span class="progress-text">Group Progress</span>
+                                <span class="progress-percentage">${Math.round((group.totalPoints / 1000) * 100)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${Math.min((group.totalPoints / 1000) * 100, 100)}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group-members-preview">
+                        <h4>
+                            <i class="fas fa-users"></i>
+                            Tribe Members (${group.members.length})
+                        </h4>
+                        <div class="members-list">
+                            ${membersToShow.map(member => `
+                                <div class="member-preview">
+                                    <div class="member-info">
+                                        <div class="member-avatar">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <span class="member-name" title="${member.name}">${this.shortenName(member.name)}</span>
+                                    </div>
+                                    <span class="member-points">
+                                        <i class="fas fa-gem"></i>
+                                        ${member.points}
+                                    </span>
+                                </div>
+                            `).join('')}
+                            ${hasMoreMembers ? `
+                                <div class="more-members" onclick="app.showGroupModal('${group.groupName}', '${group.className}')">
+                                    +${group.members.length - 3} more members
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="group-actions">
+                        <button class="premium-btn small outline" onclick="app.showGroupModal('${group.groupName}', '${group.className}')">
+                            <i class="fas fa-eye"></i>
+                            View Details
                         </button>
-                    ` : ''}
+                        ${this.isAuthenticated ? `
+                            <button class="premium-btn small" onclick="app.applyGroupBonus('${group.groupName}', '${group.className}')">
+                                <i class="fas fa-plus"></i>
+                                Add Bonus
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Add click handlers for group cards
+        groupsGrid.querySelectorAll('.group-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.premium-btn')) {
+                    const groupName = card.getAttribute('data-group');
+                    const className = card.getAttribute('data-class');
+                    this.showGroupModal(groupName, className);
+                }
+            });
+        });
+    }
+
+    async loadLeaderboardData(className) {
+        const groupsContent = document.getElementById('groupsLeaderboardContent');
+        const individualsContent = document.getElementById('individualsLeaderboardContent');
+
+        // Show loading states
+        [groupsContent, individualsContent].forEach(container => {
+            if (container) {
+                container.innerHTML = `
+                    <div class="loading-leaderboard">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading rankings...</p>
+                    </div>
+                `;
+            }
+        });
+
+        try {
+            const response = await this.fetchData('getGroups', { class: className });
+            
+            if (response.success) {
+                this.leaderboardData = response.data;
+                this.renderGroupsLeaderboard(response.data);
+                this.renderIndividualsLeaderboard(response.data);
+            } else {
+                throw new Error(response.error || 'Failed to load leaderboard data');
+            }
+        } catch (error) {
+            console.error('Error loading leaderboard data:', error);
+            const errorHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Failed to load leaderboard data</p>
+                    <button class="premium-btn small" onclick="app.loadLeaderboardData('${className}')">
+                        <i class="fas fa-redo"></i>
+                        Try Again
+                    </button>
+                </div>
+            `;
+            
+            if (groupsContent) groupsContent.innerHTML = errorHTML;
+            if (individualsContent) individualsContent.innerHTML = errorHTML;
+        }
+    }
+
+    renderGroupsLeaderboard(data) {
+        const container = document.getElementById('groupsLeaderboardContent');
+        if (!container) return;
+
+        // Flatten and sort groups
+        const allGroups = [];
+        for (const className in data) {
+            for (const level in data[className]) {
+                for (const groupName in data[className][level]) {
+                    const group = data[className][level][groupName];
+                    allGroups.push({
+                        className,
+                        level,
+                        groupName,
+                        ...group
+                    });
+                }
+            }
+        }
+
+        allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
+
+        if (allGroups.length === 0) {
+            container.innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-users-slash"></i>
+                    <p>No groups found</p>
                 </div>
             `;
             return;
         }
-        
-        // Flatten and sort groups
-        const allGroups = [];
-        for (const level in classData) {
-            for (const groupName in classData[level]) {
-                allGroups.push({
-                    name: groupName,
-                    level: level,
-                    ...classData[level][groupName]
-                });
-            }
-        }
-        
-        // Sort by total points
-        allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
-        
-        let html = '';
-        
-        if (allGroups.length === 0) {
-            html = `
-                <div class="no-data">
-                    <i class="fas fa-users"></i>
-                    <p>No groups found in ${className}</p>
-                </div>
-            `;
-        } else {
-            allGroups.forEach((group, index) => {
-                const rank = index + 1;
-                const mascot = group.name.split(' ')[0];
-                const progress = Math.min((group.totalPoints || 0) % 100, 100);
-                const rankClass = rank <= 3 ? `rank-${rank}` : '';
-                const pointsClass = group.totalPoints >= 1000 ? 'points-large' : 
-                                  group.totalPoints >= 100 ? 'points-medium' : '';
-                
-                html += `
-                    <div class="group-card ${rankClass}">
-                        <div class="group-header">
-                            <div class="group-mascot">${mascot}</div>
-                            <div class="group-info">
-                                <h3 class="group-name" title="${group.name}">${group.name}</h3>
-                                <div class="group-level">${group.level}</div>
+
+        container.innerHTML = `
+            <div class="leaderboard-header">
+                <div>Rank</div>
+                <div>Group</div>
+                <div>Points</div>
+            </div>
+            <div class="leaderboard-list">
+                ${allGroups.map((group, index) => {
+                    const rank = index + 1;
+                    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                    
+                    return `
+                        <div class="leaderboard-item ${rankClass}" onclick="app.showGroupModal('${group.groupName}', '${group.className}')">
+                            <div class="rank">
                                 ${rank <= 3 ? `
-                                    <div class="group-rank">
-                                        <i class="fas fa-trophy"></i>
-                                        #${rank}
+                                    <div class="rank-medal">
+                                        <i class="fas fa-medal"></i>
+                                        ${rank}
                                     </div>
-                                ` : ''}
+                                ` : `
+                                    <div class="rank-number">${rank}</div>
+                                `}
                             </div>
-                            <div class="group-points">
-                                <div class="points-display ${pointsClass}" data-points="${group.totalPoints}">
-                                    ${group.totalPoints}
+                            <div class="group-info">
+                                <div class="group-mascot">
+                                    ${this.getGroupEmoji(group.groupName)}
                                 </div>
-                                <div class="points-label">Crystals</div>
+                                <div class="group-details">
+                                    <div class="group-name">${group.groupName}</div>
+                                    <div class="group-meta">${group.level} • ${group.className}</div>
+                                </div>
+                            </div>
+                            <div class="points">
+                                <div class="points-badge">
+                                    <i class="fas fa-gem"></i>
+                                    ${this.formatPoints(group.totalPoints)}
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="group-members-preview">
-                            <h4><i class="fas fa-users"></i> Top Adventurers</h4>
-                            <div class="members-list">
-                                ${group.members
-                                    .sort((a, b) => b.points - a.points)
-                                    .slice(0, 3)
-                                    .map(member => `
-                                        <div class="member-preview">
-                                            <span class="member-name" title="${member.name}">${getDisplayName(member.name)}</span>
-                                            <span class="member-points">
-                                                <i class="fas fa-gem"></i>
-                                                ${member.points}
-                                            </span>
-                                        </div>
-                                    `).join('')}
-                                ${group.members.length > 3 ? `
-                                    <div class="more-members">
-                                        +${group.members.length - 3} more adventurers
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                        
-                        <div class="group-actions">
-                            <button class="premium-btn outline" onclick="openGroupModal('${group.name.replace(/'/g, "\\'")}', '${className}')">
-                                <i class="fas fa-eye"></i>
-                                View Tribe
-                            </button>
-                            ${APP_STATE.isAdmin ? `
-                                <button class="premium-btn" onclick="applyGroupBonus('${group.name.replace(/'/g, "\\'")}', '${className}')">
-                                    <i class="fas fa-star"></i>
-                                    Team Bonus
-                                </button>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="group-progress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progress}%"></div>
-                            </div>
-                            <div class="progress-text">${group.totalPoints} crystals collected</div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        
-        grid.innerHTML = html;
-        
-        // Update points display after rendering
-        setTimeout(updatePointsDisplay, 100);
-        
-    } catch (error) {
-        console.error('Error rendering dashboard:', error);
-        grid.innerHTML = `
-            <div class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Unable to load dashboard data</p>
-                <button class="premium-btn" onclick="loadDashboardData('${className}')">
-                    <i class="fas fa-redo"></i>
-                    Try Again
-                </button>
+                    `;
+                }).join('')}
             </div>
         `;
     }
-}
 
-// Leaderboard Functions
-async function loadLeaderboardData(className = 'all') {
-    try {
-        const result = await callAPI({
-            action: 'getGroups',
-            class: className === 'all' ? '' : className
-        });
-        
-        if (result.success) {
-            APP_STATE.groupsData = result.data;
-            renderLeaderboard(className);
-        }
-    } catch (error) {
-        console.error('Error loading leaderboard:', error);
-        APP_STATE.groupsData = getEnhancedMockData('getGroups', { class: className }).data;
-        renderLeaderboard(className);
-    }
-}
+    renderIndividualsLeaderboard(data) {
+        const container = document.getElementById('individualsLeaderboardContent');
+        if (!container) return;
 
-function renderLeaderboard(className) {
-    const groupsContent = document.getElementById('groupsLeaderboardContent');
-    const individualsContent = document.getElementById('individualsLeaderboardContent');
-    
-    if (!groupsContent || !individualsContent) return;
-    
-    // Render Groups Leaderboard
-    const groupsData = processGroupsLeaderboard(className);
-    groupsContent.innerHTML = groupsData.length > 0 ? renderGroupsLeaderboardHTML(groupsData) : `
-        <div class="no-data">
-            <i class="fas fa-users"></i>
-            <p>No groups found</p>
-        </div>
-    `;
-    
-    // Render Individuals Leaderboard
-    const individualsData = processIndividualsLeaderboard(className);
-    individualsContent.innerHTML = individualsData.length > 0 ? renderIndividualsLeaderboardHTML(individualsData) : `
-        <div class="no-data">
-            <i class="fas fa-user"></i>
-            <p>No students found</p>
-        </div>
-    `;
-}
-
-function processGroupsLeaderboard(className) {
-    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
-    const allGroups = [];
-    
-    for (const classKey in data) {
-        for (const level in data[classKey]) {
-            for (const groupName in data[classKey][level]) {
-                const group = data[classKey][level][groupName];
-                allGroups.push({
-                    name: groupName,
-                    class: classKey,
-                    level: level,
-                    mascot: groupName.split(' ')[0],
-                    totalPoints: group.totalPoints,
-                    memberCount: group.members.length,
-                    averagePoints: Math.round(group.totalPoints / group.members.length)
-                });
-            }
-        }
-    }
-    
-    return allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
-}
-
-function processIndividualsLeaderboard(className) {
-    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
-    const allIndividuals = [];
-    
-    for (const classKey in data) {
-        for (const level in data[classKey]) {
-            for (const groupName in data[classKey][level]) {
-                const group = data[classKey][level][groupName];
-                group.members.forEach(member => {
-                    allIndividuals.push({
-                        name: member.name,
-                        class: classKey,
-                        group: groupName,
-                        level: level,
-                        mascot: groupName.split(' ')[0],
-                        points: member.points
+        // Flatten all students
+        const allStudents = [];
+        for (const className in data) {
+            for (const level in data[className]) {
+                for (const groupName in data[className][level]) {
+                    const group = data[className][level][groupName];
+                    group.members.forEach(member => {
+                        allStudents.push({
+                            className,
+                            level,
+                            groupName,
+                            ...member
+                        });
                     });
-                });
+                }
             }
         }
-    }
-    
-    return allIndividuals.sort((a, b) => b.points - a.points);
-}
 
-function renderGroupsLeaderboardHTML(groups) {
-    return `
-        <div class="leaderboard-header">
-            <span>Rank</span>
-            <span>Group</span>
-            <span>Points</span>
-        </div>
-        <div class="leaderboard-list">
-            ${groups.map((group, index) => `
-                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
-                    <div class="rank">
-                        ${index < 3 ? `
-                            <div class="rank-medal">
-                                <i class="fas fa-trophy"></i>
-                                <span>${index + 1}</span>
-                            </div>
-                        ` : `
-                            <span class="rank-number">#${index + 1}</span>
-                        `}
-                    </div>
-                    <div class="group-info">
-                        <div class="group-mascot">${group.mascot}</div>
-                        <div class="group-details">
-                            <h4 class="group-name">${group.name}</h4>
-                            <p class="group-meta">${group.class} • ${group.level}</p>
-                        </div>
-                    </div>
-                    <div class="points">
-                        <div class="points-badge">
-                            <i class="fas fa-gem"></i>
-                            ${group.totalPoints}
-                        </div>
-                    </div>
+        // Sort students by points
+        allStudents.sort((a, b) => b.points - a.points);
+
+        if (allStudents.length === 0) {
+            container.innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-user-slash"></i>
+                    <p>No students found</p>
                 </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderIndividualsLeaderboardHTML(individuals) {
-    return `
-        <div class="leaderboard-header">
-            <span>Rank</span>
-            <span>Student</span>
-            <span>Points</span>
-        </div>
-        <div class="leaderboard-list">
-            ${individuals.map((student, index) => `
-                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
-                    <div class="rank">
-                        ${index < 3 ? `
-                            <div class="rank-medal">
-                                <i class="fas fa-trophy"></i>
-                                <span>${index + 1}</span>
-                            </div>
-                        ` : `
-                            <span class="rank-number">#${index + 1}</span>
-                        `}
-                    </div>
-                    <div class="student-info">
-                        <div class="student-avatar">${student.mascot}</div>
-                        <div class="student-details">
-                            <h4 class="student-name">${getDisplayName(student.name)}</h4>
-                            <p class="student-meta">${student.group} • ${student.class}</p>
-                        </div>
-                    </div>
-                    <div class="points">
-                        <div class="points-badge">
-                            <i class="fas fa-gem"></i>
-                            ${student.points}
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-// Enhanced Group Modal
-function openGroupModal(groupName, className) {
-    const classData = APP_STATE.groupsData[className];
-    if (!classData) return;
-    
-    // Find the group
-    let targetGroup = null;
-    let targetLevel = '';
-    
-    for (const level in classData) {
-        if (classData[level][groupName]) {
-            targetGroup = {
-                name: groupName,
-                level: level,
-                mascot: groupName.split(' ')[0],
-                ...classData[level][groupName]
-            };
-            targetLevel = level;
-            break;
+            `;
+            return;
         }
+
+        container.innerHTML = `
+            <div class="leaderboard-header">
+                <div>Rank</div>
+                <div>Student</div>
+                <div>Points</div>
+            </div>
+            <div class="leaderboard-list">
+                ${allStudents.map((student, index) => {
+                    const rank = index + 1;
+                    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                    
+                    return `
+                        <div class="leaderboard-item ${rankClass}">
+                            <div class="rank">
+                                ${rank <= 3 ? `
+                                    <div class="rank-medal">
+                                        <i class="fas fa-medal"></i>
+                                        ${rank}
+                                    </div>
+                                ` : `
+                                    <div class="rank-number">${rank}</div>
+                                `}
+                            </div>
+                            <div class="student-info">
+                                <div class="student-avatar">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <div class="student-details">
+                                    <div class="student-name">${this.shortenName(student.name)}</div>
+                                    <div class="student-meta">${student.groupName} • ${student.className}</div>
+                                </div>
+                            </div>
+                            <div class="points">
+                                <div class="points-badge">
+                                    <i class="fas fa-gem"></i>
+                                    ${student.points}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).slice(0, 50).join('')} <!-- Limit to top 50 -->
+            </div>
+        `;
     }
-    
-    if (!targetGroup) return;
-    
-    const modal = document.getElementById('groupModal');
-    const content = document.getElementById('modalGroupContent');
-    const groupNameElement = document.getElementById('modalGroupName');
-    
-    const membersHtml = targetGroup.members
-        .sort((a, b) => b.points - a.points)
-        .map((member, index) => `
-            <div class="member-row ${index < 3 ? 'top-member' : ''}">
-                <div class="member-rank">
-                    ${index < 3 ? `<i class="fas fa-trophy"></i>` : `#${index + 1}`}
+
+    async showGroupModal(groupName, className) {
+        if (!this.groupsData || !this.groupsData[className]) {
+            this.showToast('Group data not available', 'error');
+            return;
+        }
+
+        const modal = document.getElementById('groupModal');
+        const modalName = document.getElementById('modalGroupName');
+        const modalContent = document.getElementById('modalGroupContent');
+
+        // Show loading state
+        modalContent.innerHTML = `
+            <div class="loading-groups">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading group details...</p>
+            </div>
+        `;
+
+        // Find group data
+        let groupData = null;
+        for (const level in this.groupsData[className]) {
+            if (this.groupsData[className][level][groupName]) {
+                groupData = {
+                    level,
+                    groupName,
+                    className,
+                    ...this.groupsData[className][level][groupName]
+                };
+                break;
+            }
+        }
+
+        if (!groupData) {
+            modalContent.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Group not found</p>
                 </div>
-                <div class="member-info">
-                    <span class="member-name" title="${member.name}">${getDisplayName(member.name)}</span>
-                    <span class="member-points">
-                        <i class="fas fa-gem"></i>
-                        ${member.points}
-                    </span>
+            `;
+            this.showModal(modal);
+            return;
+        }
+
+        // Sort members by points
+        groupData.members.sort((a, b) => b.points - a.points);
+
+        // Render modal content
+        modalName.innerHTML = `
+            <i class="fas fa-users"></i>
+            ${groupData.groupName}
+        `;
+
+        modalContent.innerHTML = `
+            <div class="group-modal-content">
+                <div class="group-modal-header">
+                    <div class="modal-mascot">
+                        ${this.getGroupEmoji(groupData.groupName)}
+                    </div>
+                    <div class="modal-group-info">
+                        <h3>${groupData.groupName}</h3>
+                        <p>${groupData.level} • ${groupData.className}</p>
+                        <div class="group-total-points">
+                            <i class="fas fa-gem"></i>
+                            Total: ${this.formatPoints(groupData.totalPoints)} Crystals
+                        </div>
+                    </div>
                 </div>
-                ${APP_STATE.isAdmin ? `
-                    <div class="member-actions">
-                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name.replace(/'/g, "\\'")}', 10)">
+
+                <div class="members-full-list">
+                    <h4>
+                        <i class="fas fa-users"></i>
+                        Tribe Members (${groupData.members.length})
+                    </h4>
+                    <div class="members-table">
+                        ${groupData.members.map((member, index) => {
+                            const isTopMember = index < 3;
+                            return `
+                                <div class="member-row ${isTopMember ? 'top-member' : ''}">
+                                    <div class="member-rank">${index + 1}</div>
+                                    <div class="member-info">
+                                        <span class="member-name">${member.name}</span>
+                                        <span class="member-class">${groupData.className}</span>
+                                    </div>
+                                    <div class="member-points">
+                                        <i class="fas fa-gem"></i>
+                                        ${member.points}
+                                    </div>
+                                    ${this.isAuthenticated ? `
+                                        <div class="member-actions">
+                                            <button class="premium-btn small" onclick="app.updateStudentPoints('${member.name}', 5)">
+                                                +5
+                                            </button>
+                                            <button class="premium-btn small outline" onclick="app.updateStudentPoints('${member.name}', -5)">
+                                                -5
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                ${this.isAuthenticated ? `
+                    <div class="group-actions" style="margin-top: 2rem;">
+                        <button class="premium-btn" onclick="app.applyGroupBonus('${groupData.groupName}', '${groupData.className}')">
                             <i class="fas fa-plus"></i>
-                            10
-                        </button>
-                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name.replace(/'/g, "\\'")}', 5)">
-                            <i class="fas fa-plus"></i>
-                            5
-                        </button>
-                        <button class="premium-btn small" onclick="updateStudentPoints('${member.name.replace(/'/g, "\\'")}', 1)">
-                            <i class="fas fa-plus"></i>
-                            1
+                            Add Group Bonus (+10 each)
                         </button>
                     </div>
                 ` : ''}
             </div>
-        `).join('');
-    
-    content.innerHTML = `
-        <div class="group-modal-content">
-            <div class="group-modal-header">
-                <div class="modal-mascot">${targetGroup.mascot}</div>
-                <div class="modal-group-info">
-                    <h3>${targetGroup.name}</h3>
-                    <p>${targetGroup.level} • ${targetGroup.members.length} Members</p>
-                    <div class="group-total-points">
-                        <i class="fas fa-gem"></i>
-                        ${targetGroup.totalPoints} Total Crystals
-                    </div>
-                </div>
-            </div>
-            <div class="members-full-list">
-                <h4><i class="fas fa-list-ol"></i> Tribe Members Ranking</h4>
-                <div class="members-table">
-                    ${membersHtml || '<p>No members found</p>'}
-                </div>
-            </div>
-        </div>
-    `;
-    
-    groupNameElement.innerHTML = `<i class="fas fa-users"></i> ${targetGroup.name}`;
-    modal.classList.remove('hidden');
-    createSparkleEffect();
-}
+        `;
 
-// Authentication functions
-async function verifyAdminPassword(password) {
-    const result = await callAPI({
-        action: 'verifyAdmin',
-        password: password
-    });
-    return result;
-}
+        this.showModal(modal);
+    }
 
-async function getAuthToken(password) {
-    const result = await callAPI({
-        action: 'getToken',
-        password: password
-    });
-    
-    if (result.success) {
-        APP_STATE.authToken = result.token;
-        localStorage.setItem('jungleAuthToken', result.token);
-        localStorage.setItem('jungleTokenTime', Date.now());
-        localStorage.setItem('premiumUser', 'true');
-    }
-    
-    return result;
-}
+    switchView(view) {
+        this.currentView = view;
+        
+        // Update view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-view="${view}"]`).classList.add('active');
 
-// Point management functions
-async function updateStudentPoints(studentName, pointsChange) {
-    if (!APP_STATE.authToken) {
-        showLoginModal();
-        return { success: false, error: 'Not authenticated' };
-    }
-    
-    const result = await callAPI({
-        action: 'updatePoints',
-        name: studentName,
-        change: pointsChange,
-        token: APP_STATE.authToken
-    });
-    
-    if (result.success) {
-        showToast(`+${pointsChange} crystals for ${getDisplayName(studentName)}! ✨`, 'success');
-        createSparkleEffect();
-        loadDashboardData(APP_STATE.currentClass);
-    } else {
-        showToast(`Failed to update points: ${result.error}`, 'error');
-    }
-    
-    return result;
-}
-
-async function applyGroupBonus(groupName, className) {
-    if (!APP_STATE.authToken) {
-        showLoginModal();
-        return { success: false, error: 'Not authenticated' };
-    }
-    
-    const result = await callAPI({
-        action: 'applyGroupBonus',
-        group: groupName,
-        class: className,
-        token: APP_STATE.authToken
-    });
-    
-    if (result.success) {
-        showToast(`+10 team bonus for ${groupName}! 🎉`, 'success');
-        createConfettiEffect();
-        loadDashboardData(APP_STATE.currentClass);
-    }
-    
-    return result;
-}
-
-async function resetAllPoints() {
-    if (!APP_STATE.authToken) {
-        showLoginModal();
-        return { success: false, error: 'Not authenticated' };
-    }
-    
-    if (!confirm('Are you sure you want to reset ALL points to zero? This cannot be undone!')) {
-        return;
-    }
-    
-    const result = await callAPI({
-        action: 'resetAll',
-        token: APP_STATE.authToken
-    });
-    
-    if (result.success) {
-        showToast('All points have been reset! 🔄', 'success');
-        loadDashboardData(APP_STATE.currentClass);
-    }
-    
-    return result;
-}
-
-async function initializeSystemData() {
-    if (!APP_STATE.authToken) {
-        showLoginModal();
-        return { success: false, error: 'Not authenticated' };
-    }
-    
-    if (!confirm('This will initialize/refresh all student data. Continue?')) {
-        return;
-    }
-    
-    const result = await callAPI({
-        action: 'initializeData'
-    });
-    
-    if (result.success) {
-        showToast('System data initialized successfully! 🎉', 'success');
-        loadDashboardData(APP_STATE.currentClass);
-    } else {
-        showToast('Failed to initialize data: ' + result.error, 'error');
-    }
-    
-    return result;
-}
-
-// UI Management functions
-function switchView(viewType) {
-    APP_STATE.currentView = viewType;
-    
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === viewType);
-    });
-    
-    if (viewType === 'teacher') {
-        showLoginModal();
-    } else {
-        APP_STATE.isAdmin = false;
-        APP_STATE.authToken = null;
-        updateUIForAuth();
-        loadDashboardData();
-        showToast('Now in Visitor View 👀', 'info');
-    }
-}
-
-function updateUIForAuth() {
-    const adminElements = document.querySelectorAll('.admin-only');
-    const loginBtn = document.getElementById('loginBtn');
-    const userInfo = document.getElementById('userInfo');
-    
-    if (APP_STATE.isAdmin) {
-        adminElements.forEach(el => el.style.display = 'flex');
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (userInfo) {
-            userInfo.style.display = 'flex';
-            userInfo.querySelector('.user-name').textContent = "Teacher";
+        // Show/hide admin elements
+        const adminElements = document.querySelectorAll('.admin-only');
+        if (view === 'teacher') {
+            this.showLoginModal();
+        } else {
+            adminElements.forEach(el => el.style.display = 'none');
+            if (this.isAuthenticated) {
+                this.handleLogout();
+            }
         }
-        document.body.classList.add('premium-admin');
-    } else {
-        adminElements.forEach(el => el.style.display = 'none');
-        if (loginBtn) loginBtn.style.display = 'flex';
-        if (userInfo) userInfo.style.display = 'none';
-        document.body.classList.remove('premium-admin');
-    }
-}
 
-function showLoginModal() {
-    const modal = document.getElementById('loginModal');
-    const passwordInput = document.getElementById('adminPassword');
-    const submitBtn = document.getElementById('submitLogin');
-    
-    modal.classList.remove('hidden');
-    passwordInput.value = '';
-    
-    const loginHandler = async () => {
-        const password = passwordInput.value;
-        if (!password) {
-            showToast('Please enter the magical password', 'error');
+        // Update UI based on view
+        this.updateUIForView();
+    }
+
+    updateUIForView() {
+        const body = document.body;
+        if (this.currentView === 'teacher' && this.isAuthenticated) {
+            body.classList.add('premium-admin');
+        } else {
+            body.classList.remove('premium-admin');
+        }
+    }
+
+    async showLoginModal() {
+        if (this.isAuthenticated) {
+            this.showToast('Already logged in', 'info');
             return;
         }
+
+        const modal = document.getElementById('loginModal');
+        document.getElementById('adminPassword').value = '';
+        this.showModal(modal);
+    }
+
+    async handleLogin() {
+        const password = document.getElementById('adminPassword').value;
+        const submitBtn = document.getElementById('submitLogin');
+
+        if (!password) {
+            this.showToast('Please enter password', 'error');
+            return;
+        }
+
+        // Show loading state
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+        submitBtn.disabled = true;
+
+        try {
+            const response = await this.fetchData('getToken', { password });
+
+            if (response.success) {
+                this.isAuthenticated = true;
+                this.adminToken = response.token;
+                
+                // Show admin elements
+                document.querySelectorAll('.admin-only').forEach(el => {
+                    el.style.display = 'flex';
+                });
+                
+                this.closeAllModals();
+                this.showToast('Successfully logged in!', 'success');
+                this.updateUIForView();
+                
+                // Load admin data if on admin page
+                if (this.currentPage === 'admin') {
+                    this.loadAdminData();
+                }
+                
+            } else {
+                throw new Error(response.error || 'Authentication failed');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showToast('Invalid password', 'error');
+            this.createParticles('error');
+        } finally {
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    handleLogout() {
+        this.isAuthenticated = false;
+        this.adminToken = null;
         
-        const tokenResult = await getAuthToken(password);
-        if (tokenResult.success) {
-            APP_STATE.isAdmin = true;
-            updateUIForAuth();
+        // Hide admin elements
+        document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Switch to visitor view if in teacher view
+        if (this.currentView === 'teacher') {
+            this.switchView('visitor');
+        }
+        
+        this.showToast('Logged out successfully', 'info');
+        this.updateUIForView();
+    }
+
+    async loadAdminData() {
+        if (!this.isAuthenticated) return;
+
+        try {
+            const [systemResponse, activityResponse] = await Promise.all([
+                this.fetchData('getData'),
+                this.fetchData('getGroups', { class: 'all' })
+            ]);
+
+            if (systemResponse.success && activityResponse.success) {
+                this.updateSystemStats(systemResponse, activityResponse);
+            }
+        } catch (error) {
+            console.error('Error loading admin data:', error);
+            this.showToast('Failed to load admin data', 'error');
+        }
+    }
+
+    updateSystemStats(systemData, groupsData) {
+        const statsContainer = document.getElementById('systemStats');
+        if (!statsContainer) return;
+
+        // Calculate statistics
+        const totalStudents = systemData.data ? systemData.data.length : 0;
+        
+        let totalCrystals = 0;
+        let totalGroups = 0;
+
+        if (groupsData.data) {
+            for (const className in groupsData.data) {
+                for (const level in groupsData.data[className]) {
+                    const groups = groupsData.data[className][level];
+                    totalGroups += Object.keys(groups).length;
+                    
+                    for (const groupName in groups) {
+                        totalCrystals += groups[groupName].totalPoints || 0;
+                    }
+                }
+            }
+        }
+
+        statsContainer.innerHTML = `
+            <div class="stat-item">
+                <i class="fas fa-users"></i>
+                <span>Total Students: ${totalStudents}</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-gem"></i>
+                <span>Total Crystals: ${this.formatPoints(totalCrystals)}</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-layer-group"></i>
+                <span>Active Groups: ${totalGroups}</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span>Last Updated: ${new Date().toLocaleTimeString()}</span>
+            </div>
+        `;
+    }
+
+    async applyGroupBonus(groupName, className) {
+        if (!this.isAuthenticated || !this.adminToken) {
+            this.showToast('Authentication required', 'error');
+            return;
+        }
+
+        try {
+            const response = await this.fetchData('applyGroupBonus', {
+                group: groupName,
+                class: className,
+                token: this.adminToken
+            });
+
+            if (response.success) {
+                this.showToast(`+10 bonus applied to ${response.studentsUpdated} students in ${groupName}`, 'success');
+                this.createParticles('success');
+                
+                // Reload data
+                this.loadDashboardData();
+                this.loadLeaderboardData('all');
+                
+                // Close modal if open
+                this.closeModal(document.getElementById('groupModal'));
+            } else {
+                throw new Error(response.error || 'Failed to apply bonus');
+            }
+        } catch (error) {
+            console.error('Error applying group bonus:', error);
+            this.showToast('Failed to apply group bonus', 'error');
+        }
+    }
+
+    async updateStudentPoints(studentName, pointsChange) {
+        if (!this.isAuthenticated || !this.adminToken) {
+            this.showToast('Authentication required', 'error');
+            return;
+        }
+
+        try {
+            const response = await this.fetchData('updatePoints', {
+                name: studentName,
+                change: pointsChange,
+                token: this.adminToken
+            });
+
+            if (response.success) {
+                const changeText = pointsChange >= 0 ? `+${pointsChange}` : pointsChange;
+                this.showToast(`${changeText} points for ${studentName}`, 'success');
+                this.createParticles('success');
+                
+                // Reload data
+                this.loadDashboardData();
+                this.loadLeaderboardData('all');
+            } else {
+                throw new Error(response.error || 'Failed to update points');
+            }
+        } catch (error) {
+            console.error('Error updating student points:', error);
+            this.showToast('Failed to update points', 'error');
+        }
+    }
+
+    async resetAllPoints() {
+        if (!this.isAuthenticated || !this.adminToken) {
+            this.showToast('Authentication required', 'error');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to reset ALL points? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const response = await this.fetchData('resetAll', {
+                token: this.adminToken
+            });
+
+            if (response.success) {
+                this.showToast(`Reset all points for ${response.studentsReset} students`, 'success');
+                this.createParticles('success');
+                
+                // Reload all data
+                this.loadDashboardData();
+                this.loadLeaderboardData('all');
+                this.loadAdminData();
+            } else {
+                throw new Error(response.error || 'Failed to reset points');
+            }
+        } catch (error) {
+            console.error('Error resetting points:', error);
+            this.showToast('Failed to reset points', 'error');
+        }
+    }
+
+    async initializeSystemData() {
+        if (!this.isAuthenticated) {
+            this.showToast('Authentication required', 'error');
+            return;
+        }
+
+        try {
+            const response = await this.fetchData('initializeData');
+
+            if (response.success) {
+                this.showToast(`System initialized with ${response.totalStudents} students`, 'success');
+                this.createParticles('success');
+                
+                // Reload all data
+                this.loadDashboardData();
+                this.loadLeaderboardData('all');
+                this.loadAdminData();
+            } else {
+                throw new Error(response.error || 'Failed to initialize data');
+            }
+        } catch (error) {
+            console.error('Error initializing data:', error);
+            this.showToast('Failed to initialize data', 'error');
+        }
+    }
+
+    switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+        // Show/hide tab content
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.getElementById(`${tabName}Leaderboard`).classList.add('active');
+    }
+
+    updateClassDisplay() {
+        const display = document.getElementById('currentClassDisplay');
+        if (display) {
+            display.innerHTML = `
+                <i class="fas fa-graduation-cap"></i>
+                ${this.currentClass}
+            `;
+        }
+    }
+
+    updateLastUpdated() {
+        const element = document.getElementById('lastUpdated');
+        if (element) {
+            element.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+        }
+    }
+
+    showModal(modal) {
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    closeModal(modal) {
+        if (modal) {
             modal.classList.add('hidden');
-            showToast('Premium teacher access granted! 🔐', 'success');
-            loadDashboardData(APP_STATE.currentClass);
-            
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.view === 'teacher');
-            });
-            
-            createSparkleEffect();
-        } else {
-            showToast('Incorrect magical password! ❌', 'error');
-            passwordInput.focus();
+            document.body.style.overflow = '';
         }
-    };
-    
-    submitBtn.onclick = loginHandler;
-    passwordInput.onkeypress = (e) => {
-        if (e.key === 'Enter') loginHandler();
-    };
-    
-    const closeBtn = modal.querySelector('.close-modal');
-    closeBtn.onclick = () => modal.classList.add('hidden');
-    modal.onclick = (e) => {
-        if (e.target === modal) modal.classList.add('hidden');
-    };
-    
-    passwordInput.focus();
-}
-
-// Page Navigation
-function switchPage(pageName) {
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-        if (link.dataset.page === pageName) link.classList.add('active');
-    });
-    
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    const targetPage = document.getElementById(pageName + 'Page');
-    if (targetPage) targetPage.classList.add('active');
-    
-    if (pageName === 'dashboard') {
-        loadDashboardData(APP_STATE.currentClass);
-    } else if (pageName === 'leaderboard') {
-        loadLeaderboardData('all');
-    } else if (pageName === 'admin') {
-        updateSystemStats();
     }
-    
-    createSparkleEffect();
-}
 
-function switchLeaderboardTab(tabName) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabName);
-    });
-    
-    document.querySelectorAll('.leaderboard-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.id === tabName + 'Leaderboard');
-    });
-}
+    closeAllModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            this.closeModal(modal);
+        });
+    }
 
-function updateSystemStats() {
-    const statsElement = document.getElementById('systemStats');
-    if (!statsElement) return;
-    
-    let totalStudents = 0;
-    let totalPoints = 0;
-    let totalGroups = 0;
-    
-    for (const className in APP_STATE.groupsData) {
-        for (const level in APP_STATE.groupsData[className]) {
-            for (const groupName in APP_STATE.groupsData[className][level]) {
-                const group = APP_STATE.groupsData[className][level][groupName];
-                totalStudents += group.members.length;
-                totalPoints += group.totalPoints;
-                totalGroups++;
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle'
+        };
+
+        toast.innerHTML = `
+            <i class="fas ${icons[type] || icons.info}"></i>
+            <span>${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // Remove toast after delay
+        setTimeout(() => {
+            toast.style.animation = 'slideInRight 0.3s ease reverse';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    createParticles(type = 'success') {
+        const container = document.getElementById('particleContainer');
+        const colors = {
+            success: ['#6366f1', '#8b5cf6', '#ec4899'],
+            error: ['#ef4444', '#f87171', '#fca5a5'],
+            info: ['#3b82f6', '#60a5fa', '#93c5fd']
+        }[type] || ['#6366f1', '#8b5cf6', '#ec4899'];
+
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.className = type === 'success' ? 'sparkle' : 'confetti';
+            
+            if (type === 'success') {
+                particle.style.background = `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
+            } else {
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = '100vh';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            
+            container.appendChild(particle);
+
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 3000);
+        }
+    }
+
+    // Utility methods
+    getGroupEmoji(groupName) {
+        const emojiMap = {
+            'Tigers': '🐯',
+            'Bears': '🐼',
+            'Rabbits': '🐰',
+            'Foxes': '🦊',
+            'Eagles': '🦅',
+            'Panthers': '🐆',
+            'Butterflies': '🦋',
+            'Monkeys': '🐒',
+            'Owls': '🦉',
+            'Wolves': '🐺',
+            'Lions': '🦁'
+        };
+
+        for (const [key, emoji] of Object.entries(emojiMap)) {
+            if (groupName.includes(key)) {
+                return emoji;
             }
         }
+        return '🐾';
     }
-    
-    statsElement.innerHTML = `
-        <div class="stat-item">
-            <i class="fas fa-users"></i>
-            <span>Total Students: ${totalStudents}</span>
-        </div>
-        <div class="stat-item">
-            <i class="fas fa-gem"></i>
-            <span>Total Crystals: ${totalPoints}</span>
-        </div>
-        <div class="stat-item">
-            <i class="fas fa-layer-group"></i>
-            <span>Active Groups: ${totalGroups}</span>
-        </div>
-        <div class="stat-item">
-            <i class="fas fa-clock"></i>
-            <span>Last Updated: ${new Date().toLocaleString()}</span>
-        </div>
-    `;
-}
 
-// Utility functions
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    const icons = {
-        success: 'fas fa-check-circle',
-        error: 'fas fa-exclamation-circle',
-        info: 'fas fa-info-circle'
-    };
-    
-    toast.innerHTML = `
-        <i class="${icons[type] || icons.info}"></i>
-        <span>${message}</span>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        if (toast.parentNode) toast.parentNode.removeChild(toast);
-    }, 4000);
-}
-
-function updateLastUpdated() {
-    const element = document.getElementById('lastUpdated');
-    if (element) {
-        element.textContent = 'Updated: ' + new Date().toLocaleTimeString();
+    shortenName(fullName) {
+        if (fullName.length <= 20) return fullName;
+        return fullName.substring(0, 17) + '...';
     }
-}
 
-function createSparkleEffect() {
-    const container = document.getElementById('particleContainer');
-    if (!container) return;
-    
-    for (let i = 0; i < 5; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        sparkle.style.left = Math.random() * 100 + 'vw';
-        sparkle.style.top = Math.random() * 100 + 'vh';
-        container.appendChild(sparkle);
-        
-        setTimeout(() => {
-            if (sparkle.parentNode) sparkle.parentNode.removeChild(sparkle);
-        }, 1000);
-    }
-}
-
-function createConfettiEffect() {
-    const container = document.getElementById('particleContainer');
-    if (!container) return;
-    
-    for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.background = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'][Math.floor(Math.random() * 5)];
-        confetti.style.animationDelay = Math.random() * 2 + 's';
-        container.appendChild(confetti);
-        
-        setTimeout(() => {
-            if (confetti.parentNode) confetti.parentNode.removeChild(confetti);
-        }, 3000);
-    }
-}
-
-function checkStoredAuth() {
-    const storedToken = localStorage.getItem('jungleAuthToken');
-    const tokenTime = localStorage.getItem('jungleTokenTime');
-    const isPremium = localStorage.getItem('premiumUser');
-    
-    if (storedToken && tokenTime && isPremium) {
-        const tokenAge = Date.now() - parseInt(tokenTime);
-        const oneHour = 3600000;
-        
-        if (tokenAge < oneHour) {
-            APP_STATE.authToken = storedToken;
-            APP_STATE.isAdmin = true;
-            updateUIForAuth();
-        } else {
-            localStorage.removeItem('jungleAuthToken');
-            localStorage.removeItem('jungleTokenTime');
-            localStorage.removeItem('premiumUser');
+    formatPoints(points) {
+        if (points >= 1000) {
+            return (points / 1000).toFixed(1) + 'k';
         }
+        return points.toString();
     }
-}
 
-// Event Listeners
-function setupPremiumEventListeners() {
-    // Navigation
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const page = e.currentTarget.dataset.page;
-            switchPage(page);
-        });
-    });
-    
-    // Class selector
-    const classSelector = document.getElementById('classSelector');
-    if (classSelector) {
-        classSelector.addEventListener('change', (e) => {
-            APP_STATE.currentClass = e.target.value;
-            const display = document.getElementById('currentClassDisplay');
-            if (display) display.innerHTML = `<i class="fas fa-graduation-cap"></i> ${APP_STATE.currentClass}`;
-            loadDashboardData(APP_STATE.currentClass);
-        });
-    }
-    
-    // Leaderboard class selector
-    const leaderboardClassSelector = document.getElementById('leaderboardClassSelector');
-    if (leaderboardClassSelector) {
-        leaderboardClassSelector.addEventListener('change', (e) => {
-            loadLeaderboardData(e.target.value);
-        });
-    }
-    
-    // Leaderboard tab buttons
-    document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            switchLeaderboardTab(e.currentTarget.dataset.tab);
-        });
-    });
-    
-    // Refresh button
-    const refreshBtn = document.getElementById('refreshData');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => {
-            loadDashboardData(APP_STATE.currentClass);
-        });
-    }
-    
-    // Login button
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.addEventListener('click', showLoginModal);
-    }
-    
-    // Logout button
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            APP_STATE.isAdmin = false;
-            APP_STATE.authToken = null;
-            localStorage.removeItem('jungleAuthToken');
-            localStorage.removeItem('jungleTokenTime');
-            localStorage.removeItem('premiumUser');
-            updateUIForAuth();
-            loadDashboardData();
-            showToast('Logged out successfully 👋', 'info');
-        });
-    }
-    
-    // View toggle buttons
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            switchView(e.currentTarget.dataset.view);
-        });
-    });
-    
-    // Reset all points button
-    const resetBtn = document.getElementById('resetAllPoints');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', resetAllPoints);
-    }
-    
-    // Close modals
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.target.closest('.modal').classList.add('hidden');
-        });
-    });
-    
-    // Close modals with escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.add('hidden');
-            });
-        }
-    });
-    
-    // Close modals by clicking outside
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
+    async fetchData(action, params = {}) {
+        const url = new URL(this.API_BASE);
+        url.searchParams.append('action', action);
+        
+        Object.keys(params).forEach(key => {
+            if (params[key] !== undefined && params[key] !== null) {
+                url.searchParams.append(key, params[key]);
             }
         });
-    });
-    
-    // Hero CTA buttons
-    document.querySelectorAll('.hero-cta[data-page]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const page = e.currentTarget.dataset.page;
-            switchPage(page);
-        });
-    });
-}
 
-// Initialize app
-let loadingTimeout = setTimeout(() => {
-    if (APP_STATE.isLoading) {
-        console.warn('⚠️ Loading timeout reached, forcing app display');
-        hideLoadingScreen();
-        showToast('App loaded successfully! 🎉', 'success');
-        APP_STATE.isLoading = false;
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
     }
-}, 10000);
 
-function clearLoadingTimeout() {
-    if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
+    // Public methods for global access
+    switchView(view) {
+        this.switchView(view);
+    }
+
+    initializeSystemData() {
+        this.initializeSystemData();
+    }
+
+    exportData() {
+        this.showToast('Export feature coming soon!', 'info');
     }
 }
 
-async function safeInitializeApp() {
-    await initializePremiumApp();
-    clearLoadingTimeout();
-}
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new JungleRewardsSystem();
+});
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', safeInitializeApp);
-} else {
-    safeInitializeApp();
+// Add service worker for PWA capabilities (optional)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
 }
-
-// Export function
-function exportData() {
-    showToast('Export feature coming soon! 📊', 'info');
-}
-
-// Make functions global
-window.openGroupModal = openGroupModal;
-window.updateStudentPoints = updateStudentPoints;
-window.applyGroupBonus = applyGroupBonus;
-window.showLoginModal = showLoginModal;
-window.switchView = switchView;
-window.switchPage = switchPage;
-window.exportData = exportData;
-window.initializeSystemData = initializeSystemData;
-window.switchLeaderboardTab = switchLeaderboardTab;
-window.loadLeaderboardData = loadLeaderboardData;

@@ -11,7 +11,7 @@ class JungleRewardsSystem {
         this.groupsData = null;
         this.leaderboardData = null;
         
-        this.API_BASE = 'https://script.google.com/macros/s/AKfycbx6j1jUHfLh9BrrvbSkDXrbrNM-HrzHiJ7NERYcQ4f7v3xDbVLN9-MrvGKSukwq_FtA/exec';
+        this.API_BASE = 'https://script.google.com/macros/s/AKfycbwhtjUWDap-S0t9U93FycOPqQHd5lJWDsVTGIJPZUUeaRQ1gp8pbXlxwbnFjkIWocOg/exec';
         
         this.init();
     }
@@ -1268,6 +1268,7 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
 
 
 

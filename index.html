@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jungle × Magical - Remedial Reward System</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+      <div class="floating-animals">
+        <div class="animal-emoji animal-1">🐯</div>
+        <div class="animal-emoji animal-2">🦊</div>
+        <div class="animal-emoji animal-3">🦅</div>
+        <div class="animal-emoji animal-4">🐒</div>
+        <div class="animal-emoji animal-5">🦁</div>
+      </div>
+      <div class="magical-logo">
+        <h1>Jungle × Magical</h1>
+        <p class="logo-subtitle">Remedial Reward System</p>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <p class="loading-text">Entering the enchanted jungle...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app-container hidden">
+    <!-- Navigation -->
+    <nav class="main-nav">
+      <div class="nav-brand">
+        <span class="mascot-emoji">🌿</span>
+        <span class="nav-title">Jungle Rewards</span>
+      </div>
+      <div class="nav-links">
+        <button class="nav-link active" data-page="home">Home</button>
+        <button class="nav-link" data-page="dashboard">Dashboard</button>
+        <button class="nav-link" data-page="leaderboard">Leaderboard</button>
+        <button class="nav-link admin-only" data-page="admin" id="adminNav">Admin</button>
+      </div>
+      <div class="nav-actions">
+        <div class="class-selector">
+          <select id="classSelector">
+            <option value="4 Pearl">4 Pearl</option>
+            <option value="4 Crystal">4 Crystal</option>
+          </select>
+        </div>
+        <button class="login-btn" id="loginBtn">Teacher Login</button>
+        <div class="user-info admin-only" id="userInfo">
+          <span class="user-email"></span>
+          <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- View Toggle -->
+    <div class="view-toggle" id="viewToggle">
+      <button class="view-btn active" data-view="visitor">Visitor View</button>
+      <button class="view-btn" data-view="teacher">Teacher View</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Home Page -->
+      <div id="homePage" class="page active">
+        <div class="home-page">
+          <section class="hero-section">
+            <h1 class="hero-title">Welcome, Brave Learners!</h1>
+            <p class="hero-subtitle">Join your animal tribe, earn magical crystals for your efforts, and grow together in our enchanted jungle classroom. Adventure awaits!</p>
+            <div class="hero-actions">
+              <button class="hero-cta" data-page="dashboard">Start Adventure →</button>
+              <button class="hero-cta secondary" onclick="switchView('teacher')">Teacher Portal</button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Dashboard Page -->
+      <div id="dashboardPage" class="page">
+        <div class="dashboard-page">
+          <div class="dashboard-header">
+            <h2 class="page-title">Class Dashboard</h2>
+            <div class="dashboard-controls">
+              <div class="class-info">
+                <span class="current-class" id="currentClassDisplay">4 Pearl</span>
+                <span class="last-updated" id="lastUpdated"></span>
+              </div>
+              <button class="btn-outline" id="refreshData">🔄 Refresh</button>
+            </div>
+          </div>
+          <div class="groups-grid" id="groupsGrid">
+            <div class="loading-groups">
+              <p>Discovering jungle tribes...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Page -->
+      <div id="leaderboardPage" class="page">
+        <div class="leaderboard-page">
+          <div class="leaderboard-header">
+            <h2 class="page-title">Enchanted Leaderboard</h2>
+            <p>Watch your tribe climb to magical heights! The top team earns the Golden Crystal Trophy.</p>
+          </div>
+          <div class="leaderboard-container">
+            <div class="podium" id="podium"></div>
+            <div class="leaderboard-list" id="leaderboardList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Page -->
+      <div id="adminPage" class="page">
+        <div class="admin-page">
+          <div class="admin-header">
+            <h2 class="page-title">Teacher Admin Panel</h2>
+            <p class="page-subtitle">Manage points, groups, and system settings</p>
+          </div>
+          <div class="admin-grid">
+            <div class="admin-card">
+              <h3>Quick Actions</h3>
+              <button class="btn-primary" id="resetAllPoints">Reset All Points</button>
+              <button class="btn-outline" onclick="exportData()">Export Data</button>
+            </div>
+            <div class="admin-card">
+              <h3>System Info</h3>
+              <div class="system-stats" id="systemStats"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Group Modal -->
+    <div id="groupModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalGroupName">Group Details</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="modalGroupContent">
+          <!-- Content loaded dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Teacher Login</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="login-form">
+            <div class="form-group">
+              <label for="adminPassword">Magical Password:</label>
+              <input type="password" id="adminPassword" placeholder="Enter enchanted password">
+            </div>
+            <button class="btn-primary" id="submitLogin">Enter Jungle</button>
+            <p><small>Default: jungle123</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Particle Container -->
+    <div id="particleContainer" class="particle-container"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

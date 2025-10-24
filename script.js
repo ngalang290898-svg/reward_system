@@ -260,6 +260,26 @@ function getEnhancedMockData(action, params) {
     }
 }
 
+// Enhanced points display with dynamic sizing
+function updatePointsDisplay() {
+    document.querySelectorAll('.points-display').forEach(display => {
+        const points = parseInt(display.textContent) || 0;
+        
+        // Add data attribute for CSS targeting
+        display.setAttribute('data-points', points);
+        
+        // Dynamic class based on digit count
+        const digitCount = points.toString().length;
+        display.className = 'points-display';
+        
+        if (digitCount >= 4) {
+            display.classList.add('points-large');
+        } else if (digitCount === 3) {
+            display.classList.add('points-medium');
+        }
+    });
+}
+
 // Enhanced initialization
 async function initializePremiumApp() {
     console.log('🚀 Initializing Premium Jungle App...');
@@ -281,6 +301,9 @@ async function initializePremiumApp() {
             showToast('Welcome to the Enchanted Jungle! 🌟✨', 'success');
             createSparkleEffect();
             APP_STATE.isLoading = false;
+            
+            // Initialize points display
+            updatePointsDisplay();
         }, 2500);
     }
 }
@@ -388,13 +411,15 @@ function renderPremiumDashboard(className) {
                 const mascot = group.name.split(' ')[0];
                 const progress = Math.min((group.totalPoints || 0) % 100, 100);
                 const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                const pointsClass = group.totalPoints >= 1000 ? 'points-large' : 
+                                  group.totalPoints >= 100 ? 'points-medium' : '';
                 
                 html += `
                     <div class="group-card ${rankClass}">
                         <div class="group-header">
                             <div class="group-mascot">${mascot}</div>
                             <div class="group-info">
-                                <h3 class="group-name">${group.name}</h3>
+                                <h3 class="group-name" title="${group.name}">${group.name}</h3>
                                 <div class="group-level">${group.level}</div>
                                 ${rank <= 3 ? `
                                     <div class="group-rank">
@@ -404,7 +429,9 @@ function renderPremiumDashboard(className) {
                                 ` : ''}
                             </div>
                             <div class="group-points">
-                                <div class="points-display">${group.totalPoints}</div>
+                                <div class="points-display ${pointsClass}" data-points="${group.totalPoints}">
+                                    ${group.totalPoints}
+                                </div>
                                 <div class="points-label">Crystals</div>
                             </div>
                         </div>
@@ -417,7 +444,7 @@ function renderPremiumDashboard(className) {
                                     .slice(0, 3)
                                     .map(member => `
                                         <div class="member-preview">
-                                            <span class="member-name">${getDisplayName(member.name)}</span>
+                                            <span class="member-name" title="${member.name}">${getDisplayName(member.name)}</span>
                                             <span class="member-points">
                                                 <i class="fas fa-gem"></i>
                                                 ${member.points}
@@ -457,6 +484,9 @@ function renderPremiumDashboard(className) {
         }
         
         grid.innerHTML = html;
+        
+        // Update points display after rendering
+        setTimeout(updatePointsDisplay, 100);
         
     } catch (error) {
         console.error('Error rendering dashboard:', error);

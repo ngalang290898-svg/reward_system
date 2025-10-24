@@ -673,4 +673,5 @@ setTimeout(() => {
         hideLoadingScreen();
         showToast('Jungle adventure loaded! 🌟', 'success');
     }
+
 }, 10000);

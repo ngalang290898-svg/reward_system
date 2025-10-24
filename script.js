@@ -1,5 +1,5 @@
 // Jungle × Magical Rewards System - Frontend
-// API URL - REPLACE THIS WITH YOUR DEPLOYED APPS SCRIPT URL
+// API URL - WITH CORS PROXY FIX
 const API_URL = 'https://script.google.com/macros/s/AKfycbwfDfRT9uq-IobDQQWeIDfinjnCJ0LIC1zKvt6iWCRL3kid9mZtgL5aFAhDj486Tj8E/exec';
 
 // Application State
@@ -35,11 +35,20 @@ function getDisplayName(malaysianName) {
     }
 }
 
-// API Communication Functions
+// API Communication Functions - WITH CORS PROXY FIX
 async function callAPI(params = {}) {
     try {
         const urlParams = new URLSearchParams(params);
-        const response = await fetch(`${API_URL}?${urlParams}`);
+        
+        // CORS PROXY FIX - Bypass Google Apps Script CORS restrictions
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(`${API_URL}?${urlParams}`);
+        
+        const response = await fetch(proxyUrl, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -673,6 +682,4 @@ setTimeout(() => {
         hideLoadingScreen();
         showToast('Jungle adventure loaded! 🌟', 'success');
     }
-
 }, 10000);
-

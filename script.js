@@ -1,6 +1,6 @@
 // 🌟 Jungle × Magical - Premium Frontend
 // API URL - Update with your deployed web app URL
-const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwfDfRT9uq-IobDQQWeIDfinjnCJ0LIC1zKvt6iWCRL3kid9mZtgL5aFAhDj486Tj8E/exec';
 
 // Premium Application State
 const APP_STATE = {
@@ -931,3 +931,4 @@ const premiumStyles = `
 const styleSheet = document.createElement('style');
 styleSheet.textContent = premiumStyles;
 document.head.appendChild(styleSheet);
+

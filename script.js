@@ -38,19 +38,19 @@ function getDisplayName(malaysianName) {
     }
 }
 
-// Premium API Communication
+// Premium API Communication - FIXED CORS ISSUE
 async function callAPI(params = {}) {
     try {
         const urlParams = new URLSearchParams(params);
-        const response = await fetch(`${API_URL}?${urlParams}`, {
-            method: 'GET',
-            mode: 'no-cors'
-        });
+        const response = await fetch(`${API_URL}?${urlParams}`);
         
-        console.log('API Request sent to:', `${API_URL}?${urlParams}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
-        // For development, return mock data
-        return getPremiumMockData(params.action, params);
+        const data = await response.json();
+        console.log('API Response:', data);
+        return data;
         
     } catch (error) {
         console.error('API Call failed:', error);
@@ -58,7 +58,7 @@ async function callAPI(params = {}) {
     }
 }
 
-// Enhanced Mock Data for Premium Experience
+// Enhanced Mock Data for Premium Experience (Fallback only)
 function getPremiumMockData(action, params) {
     const mockGroups = {
         "4 Pearl": {
@@ -70,48 +70,6 @@ function getPremiumMockData(action, params) {
                         { name: "AHMAD JIHAD BIN ABDULLAH", points: 38 },
                         { name: "ANJENNY PAILEE", points: 52 },
                         { name: "AZIZAH ALISHA BINTI AZMIZAN AZRIN", points: 21 }
-                    ]
-                },
-                "🐯 The Mighty Tigers — Group T2": {
-                    totalPoints: 128,
-                    members: [
-                        { name: "FAREL BIN ARSID", points: 35 },
-                        { name: "INDRA PUTRA BIN JAINI", points: 42 },
-                        { name: "MOHAMAD NUR ZAQIF ZIQRI BIN MOHAMAD TINO", points: 28 },
-                        { name: "MUHAMMAD DANISH IFWAT BIN MUHAMMAD IFFAD", points: 23 }
-                    ]
-                }
-            },
-            "Low A1": {
-                "🦊 The Clever Foxes — Foxes F1": {
-                    totalPoints: 189,
-                    members: [
-                        { name: "NOOR QASEH NADIA BINTI ABDULLAH", points: 65 },
-                        { name: "MUHAMMAD NAZRIN BIN ZULLASRI", points: 58 },
-                        { name: "NURUL ALISA SAPPIKA BINTI ABDULLAH", points: 42 },
-                        { name: "PUTERI MYA ARLISSA BINTI MOHD BAKRI", points: 24 }
-                    ]
-                }
-            }
-        },
-        "4 Crystal": {
-            "Pre-A1": {
-                "🐒 The Playful Monkeys — Monkeys A": {
-                    totalPoints: 142,
-                    members: [
-                        { name: "ASHIRAH BINTI ASIS", points: 38 },
-                        { name: "AIDIL FAZLI BIN ABDULLAH", points: 45 },
-                        { name: "AL SYAMIR BIN ABDUL NASIR", points: 32 },
-                        { name: "ELYANA BINTI MARTIN", points: 27 }
-                    ]
-                },
-                "🦁 The Glorious Lions — Lions A": {
-                    totalPoints: 201,
-                    members: [
-                        { name: "NURAZLIYANAH BATRISAH BINTI SABRI", points: 68 },
-                        { name: "MOHAMAD RIZANI SYAHIZIEY BIN ABDULLAH", points: 55 },
-                        { name: "MUHAMMAD HAIZUL BIN OMAR", points: 48 },
-                        { name: "MUHAMMAD QAWIEM RAFIQ BIN RAZLAN", points: 30 }
                     ]
                 }
             }
@@ -149,6 +107,212 @@ function getPremiumMockData(action, params) {
             };
     }
 }
+
+// ============ LEADERBOARD FUNCTIONS ============
+
+function renderLeaderboardSection(className, groupsData) {
+    const container = document.getElementById('leaderboardContainer');
+    if (!container) return;
+
+    const individualsData = processIndividualsData(className, groupsData);
+    const groupsLeaderboard = processGroupsLeaderboard(className, groupsData);
+
+    container.innerHTML = `
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-trophy"></i>
+                Class Leaderboard
+            </h2>
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchLeaderboardTab('groups')">
+                    <i class="fas fa-users"></i>
+                    Groups
+                </button>
+                <button class="tab-btn" onclick="switchLeaderboardTab('individuals')">
+                    <i class="fas fa-user"></i>
+                    Individuals
+                </button>
+            </div>
+        </div>
+
+        <div id="groupsLeaderboard" class="groups-leaderboard">
+            ${renderGroupsLeaderboard(groupsLeaderboard)}
+        </div>
+
+        <div id="individualsLeaderboard" class="individuals-leaderboard" style="display: none;">
+            ${renderIndividualsLeaderboard(individualsData)}
+        </div>
+
+        <div class="leaderboard-stats">
+            <div class="stat-item">
+                <i class="fas fa-users"></i>
+                <span>Total Students: ${individualsData.length}</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-layer-group"></i>
+                <span>Total Groups: ${groupsLeaderboard.length}</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-gem"></i>
+                <span>Total Points: ${individualsData.reduce((sum, student) => sum + student.points, 0)}</span>
+            </div>
+        </div>
+    `;
+}
+
+function processIndividualsData(className, groupsData) {
+    if (!groupsData || !groupsData[className]) return [];
+    
+    const allIndividuals = [];
+    
+    for (const level in groupsData[className]) {
+        for (const groupName in groupsData[className][level]) {
+            const group = groupsData[className][level][groupName];
+            group.members.forEach(member => {
+                allIndividuals.push({
+                    ...member,
+                    group: groupName,
+                    level: level,
+                    mascot: groupName.split(' ')[0]
+                });
+            });
+        }
+    }
+    
+    allIndividuals.sort((a, b) => b.points - a.points);
+    return allIndividuals;
+}
+
+function processGroupsLeaderboard(className, groupsData) {
+    if (!groupsData || !groupsData[className]) return [];
+    
+    const allGroups = [];
+    for (const level in groupsData[className]) {
+        for (const groupName in groupsData[className][level]) {
+            const group = groupsData[className][level][groupName];
+            allGroups.push({
+                name: groupName,
+                level: level,
+                mascot: groupName.split(' ')[0],
+                totalPoints: group.totalPoints,
+                memberCount: group.members.length,
+                members: group.members
+            });
+        }
+    }
+    
+    return allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
+}
+
+function renderGroupsLeaderboard(groups) {
+    return `
+        <div class="leaderboard-header">
+            <span>Rank</span>
+            <span>Group</span>
+            <span>Points</span>
+        </div>
+        
+        <div class="leaderboard-list">
+            ${groups.map((group, index) => `
+                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
+                    <div class="rank">
+                        ${index < 3 ? `
+                            <div class="rank-medal">
+                                <i class="fas fa-trophy"></i>
+                                <span>${index + 1}</span>
+                            </div>
+                        ` : `
+                            <span class="rank-number">#${index + 1}</span>
+                        `}
+                    </div>
+                    
+                    <div class="group-info">
+                        <div class="group-mascot">${group.mascot}</div>
+                        <div class="group-details">
+                            <h4 class="group-name">${group.name}</h4>
+                            <p class="group-level">${group.level} • ${group.memberCount} members</p>
+                        </div>
+                    </div>
+                    
+                    <div class="points">
+                        <div class="points-badge">
+                            <i class="fas fa-gem"></i>
+                            ${group.totalPoints}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderIndividualsLeaderboard(individuals) {
+    return `
+        <div class="leaderboard-header">
+            <span>Rank</span>
+            <span>Student</span>
+            <span>Points</span>
+        </div>
+        
+        <div class="leaderboard-list">
+            ${individuals.map((student, index) => `
+                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
+                    <div class="rank">
+                        ${index < 3 ? `
+                            <div class="rank-medal">
+                                <i class="fas fa-trophy"></i>
+                                <span>${index + 1}</span>
+                            </div>
+                        ` : `
+                            <span class="rank-number">#${index + 1}</span>
+                        `}
+                    </div>
+                    
+                    <div class="student-info">
+                        <div class="student-avatar">${student.mascot}</div>
+                        <div class="student-details">
+                            <h4 class="student-name">${getDisplayName(student.name)}</h4>
+                            <p class="student-group">${student.group}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="points">
+                        <div class="points-badge">
+                            <i class="fas fa-gem"></i>
+                            ${student.points}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function switchLeaderboardTab(tabName) {
+    const groupsTab = document.getElementById('groupsLeaderboard');
+    const individualsTab = document.getElementById('individualsLeaderboard');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    
+    // Update active tab buttons
+    tabButtons.forEach(btn => {
+        if (btn.textContent.includes(tabName === 'groups' ? 'Groups' : 'Individuals')) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Show/hide tabs
+    if (tabName === 'groups') {
+        groupsTab.style.display = 'block';
+        individualsTab.style.display = 'none';
+    } else {
+        groupsTab.style.display = 'none';
+        individualsTab.style.display = 'block';
+    }
+}
+
+// ============ END LEADERBOARD FUNCTIONS ============
 
 // Enhanced initialization with better loading handling
 async function initializePremiumApp() {
@@ -235,6 +399,7 @@ async function loadDashboardData(className = APP_STATE.currentClass) {
         if (result.success) {
             APP_STATE.groupsData = result.data;
             renderPremiumDashboard(className);
+            renderLeaderboardSection(className, APP_STATE.groupsData); // ADDED THIS LINE
             updateLastUpdated();
             console.log('✅ Dashboard data loaded successfully');
         } else {
@@ -248,6 +413,7 @@ async function loadDashboardData(className = APP_STATE.currentClass) {
         // Fallback to enhanced mock data
         APP_STATE.groupsData = getPremiumMockData('getGroups', { class: className }).data;
         renderPremiumDashboard(className);
+        renderLeaderboardSection(className, APP_STATE.groupsData); // ADDED THIS LINE
         updateLastUpdated();
     }
 }
@@ -934,3 +1100,4 @@ window.switchView = switchView;
 window.exportData = exportData;
 window.showSettings = showSettings;
 window.initializePremiumApp = initializePremiumApp;
+window.switchLeaderboardTab = switchLeaderboardTab; // ADDED THIS LINE

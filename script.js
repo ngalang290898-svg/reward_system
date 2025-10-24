@@ -1,4 +1,5 @@
-// 🌟 Jungle × Magical - Premium Frontend
+// 🌟 Premium Jungle × Magical - Complete Frontend Logic
+
 // API URL - Update with your deployed web app URL
 const API_URL = 'https://script.google.com/macros/s/AKfycbwfDfRT9uq-IobDQQWeIDfinjnCJ0LIC1zKvt6iWCRL3kid9mZtgL5aFAhDj486Tj8E/exec';
 
@@ -10,7 +11,8 @@ const APP_STATE = {
     authToken: null,
     currentView: 'visitor',
     groupsData: {},
-    premiumFeatures: true
+    premiumFeatures: true,
+    isLoading: true
 };
 
 // Enhanced Malaysian Name Display
@@ -148,126 +150,226 @@ function getPremiumMockData(action, params) {
     }
 }
 
+// Enhanced initialization with better loading handling
+async function initializePremiumApp() {
+    console.log('🚀 Initializing Premium Jungle App...');
+    
+    // Show loading screen immediately
+    showLoadingScreen();
+    
+    // Check for stored authentication
+    checkStoredAuth();
+    
+    // Setup event listeners
+    setupPremiumEventListeners();
+    
+    // Update UI based on auth state
+    updateUIForAuth();
+    
+    try {
+        // Load initial data
+        await loadDashboardData(APP_STATE.currentClass);
+        
+        // Simulate minimum loading time for better UX (2 seconds)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        showToast('Welcome to Jungle × Magical! 🎉', 'success');
+    } finally {
+        // Always hide loading screen after minimum time
+        setTimeout(() => {
+            hideLoadingScreen();
+            showToast('Welcome to the Premium Jungle Experience! 🌟✨', 'success');
+            createSparkleEffect();
+            
+            // Mark loading as complete
+            APP_STATE.isLoading = false;
+        }, 2500);
+    }
+}
+
+// Enhanced loading screen functions
+function showLoadingScreen() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const app = document.getElementById('app');
+    
+    if (loadingScreen) {
+        loadingScreen.classList.remove('hidden');
+        loadingScreen.style.display = 'flex';
+    }
+    if (app) {
+        app.classList.add('hidden');
+        app.style.display = 'none';
+    }
+    
+    console.log('📱 Loading screen shown');
+}
+
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const app = document.getElementById('app');
+    
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+        loadingScreen.style.display = 'none';
+    }
+    if (app) {
+        app.classList.remove('hidden');
+        app.style.display = 'block';
+    }
+    
+    console.log('🎉 Loading screen hidden, app shown');
+}
+
 // Premium Data Loading
 async function loadDashboardData(className = APP_STATE.currentClass) {
-    showToast('Loading premium jungle data...', 'info');
-    
-    const result = await callAPI({
-        action: 'getGroups',
-        class: className
-    });
-    
-    if (result.success) {
-        APP_STATE.groupsData = result.data;
+    try {
+        showToast('Loading premium jungle data...', 'info');
+        
+        const result = await callAPI({
+            action: 'getGroups',
+            class: className
+        });
+        
+        if (result.success) {
+            APP_STATE.groupsData = result.data;
+            renderPremiumDashboard(className);
+            updateLastUpdated();
+            console.log('✅ Dashboard data loaded successfully');
+        } else {
+            throw new Error(result.error || 'Failed to load data');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading dashboard:', error);
+        showToast('Using demo data - API connection required', 'info');
+        
+        // Fallback to enhanced mock data
+        APP_STATE.groupsData = getPremiumMockData('getGroups', { class: className }).data;
         renderPremiumDashboard(className);
         updateLastUpdated();
-        showToast('Premium data loaded successfully! 🌟', 'success');
-        createSparkleEffect();
-    } else {
-        showToast('Failed to load data: ' + (result.error || 'Unknown error'), 'error');
     }
 }
 
 // Premium Dashboard Rendering
 function renderPremiumDashboard(className) {
     const grid = document.getElementById('groupsGrid');
-    if (!grid) return;
-    
-    const classData = APP_STATE.groupsData[className];
-    if (!classData) {
-        grid.innerHTML = `
-            <div class="no-data">
-                <i class="fas fa-search"></i>
-                <p>No jungle tribes found for this class</p>
-            </div>
-        `;
+    if (!grid) {
+        console.error('❌ Groups grid element not found');
         return;
     }
     
-    // Flatten and sort groups
-    const allGroups = [];
-    for (const level in classData) {
-        for (const groupName in classData[level]) {
-            allGroups.push({
-                name: groupName,
-                level: level,
-                ...classData[level][groupName]
-            });
+    try {
+        const classData = APP_STATE.groupsData[className];
+        if (!classData) {
+            grid.innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-search"></i>
+                    <p>No jungle tribes found for ${className}</p>
+                </div>
+            `;
+            return;
         }
-    }
-    
-    // Sort by total points
-    allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
-    
-    let html = '';
-    allGroups.forEach((group, index) => {
-        const rank = index + 1;
-        const mascot = group.name.split(' ')[0];
-        const progress = Math.min((group.totalPoints || 0) % 100, 100);
-        const rankClass = rank <= 3 ? `rank-${rank}` : '';
         
-        html += `
-            <div class="group-card ${rankClass}">
-                <div class="group-header">
-                    <div class="group-mascot">${mascot}</div>
-                    <div class="group-info">
-                        <h3 class="group-name">${group.name}</h3>
-                        <div class="group-level">${group.level}</div>
-                        ${rank <= 3 ? `
-                            <div class="group-rank">
-                                <i class="fas fa-trophy"></i>
-                                #${rank}
-                            </div>
+        // Flatten and sort groups
+        const allGroups = [];
+        for (const level in classData) {
+            for (const groupName in classData[level]) {
+                allGroups.push({
+                    name: groupName,
+                    level: level,
+                    ...classData[level][groupName]
+                });
+            }
+        }
+        
+        // Sort by total points
+        allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
+        
+        let html = '';
+        allGroups.forEach((group, index) => {
+            const rank = index + 1;
+            const mascot = group.name.split(' ')[0];
+            const progress = Math.min((group.totalPoints || 0) % 100, 100);
+            const rankClass = rank <= 3 ? `rank-${rank}` : '';
+            
+            html += `
+                <div class="group-card ${rankClass}">
+                    <div class="group-header">
+                        <div class="group-mascot">${mascot}</div>
+                        <div class="group-info">
+                            <h3 class="group-name">${group.name}</h3>
+                            <div class="group-level">${group.level}</div>
+                            ${rank <= 3 ? `
+                                <div class="group-rank">
+                                    <i class="fas fa-trophy"></i>
+                                    #${rank}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="group-points">
+                            <div class="points-display">${group.totalPoints}</div>
+                            <div class="points-label">Crystals</div>
+                        </div>
+                    </div>
+                    
+                    <div class="group-members-preview">
+                        <h4><i class="fas fa-users"></i> Top Adventurers</h4>
+                        <div class="members-list">
+                            ${group.members
+                                .sort((a, b) => b.points - a.points)
+                                .slice(0, 3)
+                                .map(member => `
+                                    <div class="member-preview">
+                                        <span class="member-name">${getDisplayName(member.name)}</span>
+                                        <span class="member-points">
+                                            <i class="fas fa-gem"></i>
+                                            ${member.points}
+                                        </span>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="group-actions">
+                        <button class="premium-btn outline" onclick="openGroupModal('${group.name}', '${className}')">
+                            <i class="fas fa-eye"></i>
+                            View Tribe
+                        </button>
+                        ${APP_STATE.isAdmin ? `
+                            <button class="premium-btn" onclick="applyGroupBonus('${group.name}', '${className}')">
+                                <i class="fas fa-star"></i>
+                                Team Bonus
+                            </button>
                         ` : ''}
                     </div>
-                    <div class="group-points">
-                        <div class="points-display">${group.totalPoints}</div>
-                        <div class="points-label">Crystals</div>
+                    
+                    <div class="group-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="progress-text">${group.totalPoints} crystals collected</div>
                     </div>
                 </div>
-                
-                <div class="group-members-preview">
-                    <h4><i class="fas fa-users"></i> Top Adventurers</h4>
-                    <div class="members-list">
-                        ${group.members
-                            .sort((a, b) => b.points - a.points)
-                            .slice(0, 3)
-                            .map(member => `
-                                <div class="member-preview">
-                                    <span class="member-name">${getDisplayName(member.name)}</span>
-                                    <span class="member-points">
-                                        <i class="fas fa-gem"></i>
-                                        ${member.points}
-                                    </span>
-                                </div>
-                            `).join('')}
-                    </div>
-                </div>
-                
-                <div class="group-actions">
-                    <button class="premium-btn outline" onclick="openGroupModal('${group.name}', '${className}')">
-                        <i class="fas fa-eye"></i>
-                        View Tribe
-                    </button>
-                    ${APP_STATE.isAdmin ? `
-                        <button class="premium-btn" onclick="applyGroupBonus('${group.name}', '${className}')">
-                            <i class="fas fa-star"></i>
-                            Team Bonus
-                        </button>
-                    ` : ''}
-                </div>
-                
-                <div class="group-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${progress}%"></div>
-                    </div>
-                    <div class="progress-text">${group.totalPoints} crystals collected</div>
-                </div>
+            `;
+        });
+        
+        grid.innerHTML = html;
+        
+    } catch (error) {
+        console.error('❌ Error rendering dashboard:', error);
+        grid.innerHTML = `
+            <div class="error-state" style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.7);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent);"></i>
+                <p>Unable to load dashboard data</p>
+                <button class="premium-btn" onclick="loadDashboardData('${className}')" style="margin-top: 1rem;">
+                    <i class="fas fa-redo"></i>
+                    Try Again
+                </button>
             </div>
         `;
-    });
-    
-    grid.innerHTML = html;
+    }
 }
 
 // Enhanced Group Modal
@@ -598,20 +700,6 @@ function updateSystemStats() {
 }
 
 // Premium Utility Functions
-function showLoadingScreen() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    const app = document.getElementById('app');
-    if (loadingScreen) loadingScreen.classList.remove('hidden');
-    if (app) app.classList.add('hidden');
-}
-
-function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    const app = document.getElementById('app');
-    if (loadingScreen) loadingScreen.classList.add('hidden');
-    if (app) app.classList.remove('hidden');
-}
-
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
@@ -798,28 +886,43 @@ function setupPremiumEventListeners() {
     });
 }
 
-// Premium Initialization
-async function initializePremiumApp() {
-    showLoadingScreen();
-    
-    // Check for stored authentication
-    checkStoredAuth();
-    
-    // Setup event listeners
-    setupPremiumEventListeners();
-    
-    // Update UI based on auth state
-    updateUIForAuth();
-    
-    // Load initial data
-    await loadDashboardData(APP_STATE.currentClass);
-    
-    // Hide loading screen
-    setTimeout(() => {
+// Safety timeout to ensure loading screen doesn't get stuck
+let loadingTimeout = setTimeout(() => {
+    if (APP_STATE.isLoading) {
+        console.warn('⚠️ Loading timeout reached, forcing app display');
         hideLoadingScreen();
-        showToast('Welcome to the Premium Jungle Experience! 🌟✨', 'success');
-        createSparkleEffect();
-    }, 2500);
+        showToast('App loaded successfully! 🎉', 'success');
+        APP_STATE.isLoading = false;
+    }
+}, 10000); // 10 second timeout
+
+// Clear timeout when app loads successfully
+function clearLoadingTimeout() {
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+    }
+}
+
+// Update the initialization to clear timeout
+async function safeInitializeApp() {
+    await initializePremiumApp();
+    clearLoadingTimeout();
+}
+
+// Make sure the app initializes when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', safeInitializeApp);
+} else {
+    safeInitializeApp();
+}
+
+// Export function
+function exportData() {
+    showToast('Export feature coming soon! 📊', 'info');
+}
+
+function showSettings() {
+    showToast('Settings feature coming soon! ⚙️', 'info');
 }
 
 // Make functions global
@@ -829,106 +932,5 @@ window.applyGroupBonus = applyGroupBonus;
 window.showLoginModal = showLoginModal;
 window.switchView = switchView;
 window.exportData = exportData;
-window.showSettings = () => showToast('Settings feature coming soon! ⚙️', 'info');
+window.showSettings = showSettings;
 window.initializePremiumApp = initializePremiumApp;
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializePremiumApp);
-
-// Additional CSS for premium features
-const premiumStyles = `
-    .premium-btn.outline {
-        background: transparent;
-        border: 2px solid var(--primary-light);
-        color: var(--primary-light);
-    }
-    
-    .premium-btn.small {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-    }
-    
-    .group-card.rank-1 {
-        border: 2px solid var(--accent);
-        box-shadow: var(--glow-accent);
-    }
-    
-    .group-card.rank-2 {
-        border: 2px solid var(--primary-light);
-        box-shadow: var(--glow-primary);
-    }
-    
-    .group-card.rank-3 {
-        border: 2px solid var(--secondary);
-        box-shadow: var(--glow-secondary);
-    }
-    
-    .top-member {
-        background: rgba(99, 102, 241, 0.1) !important;
-    }
-    
-    .member-rank {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: var(--gradient-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    
-    .sparkle {
-        position: fixed;
-        width: 20px;
-        height: 20px;
-        background: var(--gradient-premium);
-        clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-        animation: sparkleFloat 1s ease-out forwards;
-        pointer-events: none;
-        z-index: 100;
-    }
-    
-    .confetti {
-        position: fixed;
-        width: 15px;
-        height: 15px;
-        animation: confettiFall 3s ease-in forwards;
-        pointer-events: none;
-        z-index: 100;
-        border-radius: 2px;
-    }
-    
-    @keyframes sparkleFloat {
-        0% {
-            transform: translateY(0) scale(1) rotate(0deg);
-            opacity: 1;
-        }
-        100% {
-            transform: translateY(-100px) scale(0) rotate(180deg);
-            opacity: 0;
-        }
-    }
-    
-    @keyframes confettiFall {
-        0% {
-            transform: translateY(-100px) rotate(0deg);
-            opacity: 1;
-        }
-        100% {
-            transform: translateY(100vh) rotate(360deg);
-            opacity: 0;
-        }
-    }
-    
-    .premium-admin .main-content {
-        background: rgba(99, 102, 241, 0.02);
-    }
-`;
-
-// Inject premium styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = premiumStyles;
-document.head.appendChild(styleSheet);
-

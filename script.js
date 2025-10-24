@@ -63,13 +63,35 @@ function getPremiumMockData(action, params) {
     const mockGroups = {
         "4 Pearl": {
             "Pre-A1": {
-                "🐯 The Mighty Tigers — Group T1": {
+                "🐯 The Mighty Tigers": {
                     totalPoints: 156,
                     members: [
                         { name: "ADELLA KAISARA BINTI AMDAN", points: 45 },
                         { name: "AHMAD JIHAD BIN ABDULLAH", points: 38 },
                         { name: "ANJENNY PAILEE", points: 52 },
                         { name: "AZIZAH ALISHA BINTI AZMIZAN AZRIN", points: 21 }
+                    ]
+                },
+                "🐼 The Brave Bears": {
+                    totalPoints: 128,
+                    members: [
+                        { name: "GIDEON GALE GARRY", points: 35 },
+                        { name: "FAREL BIN ARSID", points: 42 },
+                        { name: "INDRA PUTRA BIN JAINI", points: 28 },
+                        { name: "MOHAMMAD ABDUL KHALIQ BIN NAISAR", points: 23 }
+                    ]
+                }
+            }
+        },
+        "4 Crystal": {
+            "Pre-A1": {
+                "🐒 The Playful Monkeys": {
+                    totalPoints: 142,
+                    members: [
+                        { name: "ASHIRAH BINTI ASIS", points: 38 },
+                        { name: "AIDIL FAZLI BIN ABDULLAH", points: 45 },
+                        { name: "AL SYAMIR BIN ABDUL NASIR", points: 32 },
+                        { name: "ELYANA BINTI MARTIN", points: 27 }
                     ]
                 }
             }
@@ -99,6 +121,13 @@ function getPremiumMockData(action, params) {
                 };
             }
             return { success: false, error: 'Invalid password' };
+        case 'initializeData':
+            return {
+                success: true,
+                message: "Data initialized successfully",
+                totalStudents: 72,
+                premium: true
+            };
         default:
             return { 
                 success: true, 
@@ -107,212 +136,6 @@ function getPremiumMockData(action, params) {
             };
     }
 }
-
-// ============ LEADERBOARD FUNCTIONS ============
-
-function renderLeaderboardSection(className, groupsData) {
-    const container = document.getElementById('leaderboardContainer');
-    if (!container) return;
-
-    const individualsData = processIndividualsData(className, groupsData);
-    const groupsLeaderboard = processGroupsLeaderboard(className, groupsData);
-
-    container.innerHTML = `
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-trophy"></i>
-                Class Leaderboard
-            </h2>
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchLeaderboardTab('groups')">
-                    <i class="fas fa-users"></i>
-                    Groups
-                </button>
-                <button class="tab-btn" onclick="switchLeaderboardTab('individuals')">
-                    <i class="fas fa-user"></i>
-                    Individuals
-                </button>
-            </div>
-        </div>
-
-        <div id="groupsLeaderboard" class="groups-leaderboard">
-            ${renderGroupsLeaderboard(groupsLeaderboard)}
-        </div>
-
-        <div id="individualsLeaderboard" class="individuals-leaderboard" style="display: none;">
-            ${renderIndividualsLeaderboard(individualsData)}
-        </div>
-
-        <div class="leaderboard-stats">
-            <div class="stat-item">
-                <i class="fas fa-users"></i>
-                <span>Total Students: ${individualsData.length}</span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-layer-group"></i>
-                <span>Total Groups: ${groupsLeaderboard.length}</span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-gem"></i>
-                <span>Total Points: ${individualsData.reduce((sum, student) => sum + student.points, 0)}</span>
-            </div>
-        </div>
-    `;
-}
-
-function processIndividualsData(className, groupsData) {
-    if (!groupsData || !groupsData[className]) return [];
-    
-    const allIndividuals = [];
-    
-    for (const level in groupsData[className]) {
-        for (const groupName in groupsData[className][level]) {
-            const group = groupsData[className][level][groupName];
-            group.members.forEach(member => {
-                allIndividuals.push({
-                    ...member,
-                    group: groupName,
-                    level: level,
-                    mascot: groupName.split(' ')[0]
-                });
-            });
-        }
-    }
-    
-    allIndividuals.sort((a, b) => b.points - a.points);
-    return allIndividuals;
-}
-
-function processGroupsLeaderboard(className, groupsData) {
-    if (!groupsData || !groupsData[className]) return [];
-    
-    const allGroups = [];
-    for (const level in groupsData[className]) {
-        for (const groupName in groupsData[className][level]) {
-            const group = groupsData[className][level][groupName];
-            allGroups.push({
-                name: groupName,
-                level: level,
-                mascot: groupName.split(' ')[0],
-                totalPoints: group.totalPoints,
-                memberCount: group.members.length,
-                members: group.members
-            });
-        }
-    }
-    
-    return allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
-}
-
-function renderGroupsLeaderboard(groups) {
-    return `
-        <div class="leaderboard-header">
-            <span>Rank</span>
-            <span>Group</span>
-            <span>Points</span>
-        </div>
-        
-        <div class="leaderboard-list">
-            ${groups.map((group, index) => `
-                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
-                    <div class="rank">
-                        ${index < 3 ? `
-                            <div class="rank-medal">
-                                <i class="fas fa-trophy"></i>
-                                <span>${index + 1}</span>
-                            </div>
-                        ` : `
-                            <span class="rank-number">#${index + 1}</span>
-                        `}
-                    </div>
-                    
-                    <div class="group-info">
-                        <div class="group-mascot">${group.mascot}</div>
-                        <div class="group-details">
-                            <h4 class="group-name">${group.name}</h4>
-                            <p class="group-level">${group.level} • ${group.memberCount} members</p>
-                        </div>
-                    </div>
-                    
-                    <div class="points">
-                        <div class="points-badge">
-                            <i class="fas fa-gem"></i>
-                            ${group.totalPoints}
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderIndividualsLeaderboard(individuals) {
-    return `
-        <div class="leaderboard-header">
-            <span>Rank</span>
-            <span>Student</span>
-            <span>Points</span>
-        </div>
-        
-        <div class="leaderboard-list">
-            ${individuals.map((student, index) => `
-                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
-                    <div class="rank">
-                        ${index < 3 ? `
-                            <div class="rank-medal">
-                                <i class="fas fa-trophy"></i>
-                                <span>${index + 1}</span>
-                            </div>
-                        ` : `
-                            <span class="rank-number">#${index + 1}</span>
-                        `}
-                    </div>
-                    
-                    <div class="student-info">
-                        <div class="student-avatar">${student.mascot}</div>
-                        <div class="student-details">
-                            <h4 class="student-name">${getDisplayName(student.name)}</h4>
-                            <p class="student-group">${student.group}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="points">
-                        <div class="points-badge">
-                            <i class="fas fa-gem"></i>
-                            ${student.points}
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function switchLeaderboardTab(tabName) {
-    const groupsTab = document.getElementById('groupsLeaderboard');
-    const individualsTab = document.getElementById('individualsLeaderboard');
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    
-    // Update active tab buttons
-    tabButtons.forEach(btn => {
-        if (btn.textContent.includes(tabName === 'groups' ? 'Groups' : 'Individuals')) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-    
-    // Show/hide tabs
-    if (tabName === 'groups') {
-        groupsTab.style.display = 'block';
-        individualsTab.style.display = 'none';
-    } else {
-        groupsTab.style.display = 'none';
-        individualsTab.style.display = 'block';
-    }
-}
-
-// ============ END LEADERBOARD FUNCTIONS ============
 
 // Enhanced initialization with better loading handling
 async function initializePremiumApp() {
@@ -399,7 +222,6 @@ async function loadDashboardData(className = APP_STATE.currentClass) {
         if (result.success) {
             APP_STATE.groupsData = result.data;
             renderPremiumDashboard(className);
-            renderLeaderboardSection(className, APP_STATE.groupsData); // ADDED THIS LINE
             updateLastUpdated();
             console.log('✅ Dashboard data loaded successfully');
         } else {
@@ -413,7 +235,6 @@ async function loadDashboardData(className = APP_STATE.currentClass) {
         // Fallback to enhanced mock data
         APP_STATE.groupsData = getPremiumMockData('getGroups', { class: className }).data;
         renderPremiumDashboard(className);
-        renderLeaderboardSection(className, APP_STATE.groupsData); // ADDED THIS LINE
         updateLastUpdated();
     }
 }
@@ -433,6 +254,10 @@ function renderPremiumDashboard(className) {
                 <div class="no-data">
                     <i class="fas fa-search"></i>
                     <p>No jungle tribes found for ${className}</p>
+                    <button class="premium-btn" onclick="initializeSystemData()" style="margin-top: 1rem;">
+                        <i class="fas fa-database"></i>
+                        Initialize Data
+                    </button>
                 </div>
             `;
             return;
@@ -715,6 +540,221 @@ async function resetAllPoints() {
     return result;
 }
 
+async function initializeSystemData() {
+    if (!APP_STATE.authToken) {
+        showLoginModal();
+        return { success: false, error: 'Not authenticated' };
+    }
+    
+    if (!confirm('This will initialize/refresh all student data. Continue?')) {
+        return;
+    }
+    
+    const result = await callAPI({
+        action: 'initializeData'
+    });
+    
+    if (result.success) {
+        showToast('System data initialized successfully! 🎉', 'success');
+        loadDashboardData(APP_STATE.currentClass);
+    } else {
+        showToast('Failed to initialize data', 'error');
+    }
+    
+    return result;
+}
+
+// Leaderboard Functions
+async function loadLeaderboardData(className = 'all') {
+    try {
+        const result = await callAPI({
+            action: 'getGroups',
+            class: className === 'all' ? '' : className
+        });
+        
+        if (result.success) {
+            APP_STATE.groupsData = result.data;
+            renderLeaderboard(className);
+        }
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        APP_STATE.groupsData = getPremiumMockData('getGroups', { class: className }).data;
+        renderLeaderboard(className);
+    }
+}
+
+function renderLeaderboard(className) {
+    const groupsContent = document.getElementById('groupsLeaderboardContent');
+    const individualsContent = document.getElementById('individualsLeaderboardContent');
+    
+    if (!groupsContent || !individualsContent) return;
+    
+    // Render Groups Leaderboard
+    const groupsData = processGroupsLeaderboard(className);
+    groupsContent.innerHTML = renderGroupsLeaderboardHTML(groupsData);
+    
+    // Render Individuals Leaderboard
+    const individualsData = processIndividualsLeaderboard(className);
+    individualsContent.innerHTML = renderIndividualsLeaderboardHTML(individualsData);
+}
+
+function processGroupsLeaderboard(className) {
+    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
+    const allGroups = [];
+    
+    for (const classKey in data) {
+        for (const level in data[classKey]) {
+            for (const groupName in data[classKey][level]) {
+                const group = data[classKey][level][groupName];
+                allGroups.push({
+                    name: groupName,
+                    class: classKey,
+                    level: level,
+                    mascot: groupName.split(' ')[0],
+                    totalPoints: group.totalPoints,
+                    memberCount: group.members.length,
+                    averagePoints: Math.round(group.totalPoints / group.members.length)
+                });
+            }
+        }
+    }
+    
+    return allGroups.sort((a, b) => b.totalPoints - a.totalPoints);
+}
+
+function processIndividualsLeaderboard(className) {
+    const data = className === 'all' ? APP_STATE.groupsData : { [className]: APP_STATE.groupsData[className] };
+    const allIndividuals = [];
+    
+    for (const classKey in data) {
+        for (const level in data[classKey]) {
+            for (const groupName in data[classKey][level]) {
+                const group = data[classKey][level][groupName];
+                group.members.forEach(member => {
+                    allIndividuals.push({
+                        name: member.name,
+                        class: classKey,
+                        group: groupName,
+                        level: level,
+                        mascot: groupName.split(' ')[0],
+                        points: member.points
+                    });
+                });
+            }
+        }
+    }
+    
+    return allIndividuals.sort((a, b) => b.points - a.points);
+}
+
+function renderGroupsLeaderboardHTML(groups) {
+    if (groups.length === 0) {
+        return `
+            <div class="no-data">
+                <i class="fas fa-users"></i>
+                <p>No groups found</p>
+            </div>
+        `;
+    }
+    
+    return `
+        <div class="leaderboard-header">
+            <span>Rank</span>
+            <span>Group</span>
+            <span>Points</span>
+        </div>
+        <div class="leaderboard-list">
+            ${groups.map((group, index) => `
+                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
+                    <div class="rank">
+                        ${index < 3 ? `
+                            <div class="rank-medal">
+                                <i class="fas fa-trophy"></i>
+                                <span>${index + 1}</span>
+                            </div>
+                        ` : `
+                            <span class="rank-number">#${index + 1}</span>
+                        `}
+                    </div>
+                    <div class="group-info">
+                        <div class="group-mascot">${group.mascot}</div>
+                        <div class="group-details">
+                            <h4 class="group-name">${group.name}</h4>
+                            <p class="group-meta">${group.class} • ${group.level}</p>
+                        </div>
+                    </div>
+                    <div class="points">
+                        <div class="points-badge">
+                            <i class="fas fa-gem"></i>
+                            ${group.totalPoints}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderIndividualsLeaderboardHTML(individuals) {
+    if (individuals.length === 0) {
+        return `
+            <div class="no-data">
+                <i class="fas fa-user"></i>
+                <p>No students found</p>
+            </div>
+        `;
+    }
+    
+    return `
+        <div class="leaderboard-header">
+            <span>Rank</span>
+            <span>Student</span>
+            <span>Points</span>
+        </div>
+        <div class="leaderboard-list">
+            ${individuals.map((student, index) => `
+                <div class="leaderboard-item ${index < 3 ? `rank-${index + 1}` : ''}">
+                    <div class="rank">
+                        ${index < 3 ? `
+                            <div class="rank-medal">
+                                <i class="fas fa-trophy"></i>
+                                <span>${index + 1}</span>
+                            </div>
+                        ` : `
+                            <span class="rank-number">#${index + 1}</span>
+                        `}
+                    </div>
+                    <div class="student-info">
+                        <div class="student-avatar">${student.mascot}</div>
+                        <div class="student-details">
+                            <h4 class="student-name">${getDisplayName(student.name)}</h4>
+                            <p class="student-meta">${student.group} • ${student.class}</p>
+                        </div>
+                    </div>
+                    <div class="points">
+                        <div class="points-badge">
+                            <i class="fas fa-gem"></i>
+                            ${student.points}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function switchLeaderboardTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.id === tabName + 'Leaderboard');
+    });
+}
+
 // Premium UI Management
 function switchView(viewType) {
     APP_STATE.currentView = viewType;
@@ -819,6 +859,8 @@ function switchPage(pageName) {
     
     if (pageName === 'dashboard') {
         loadDashboardData(APP_STATE.currentClass);
+    } else if (pageName === 'leaderboard') {
+        loadLeaderboardData('all');
     } else if (pageName === 'admin') {
         updateSystemStats();
     }
@@ -976,6 +1018,21 @@ function setupPremiumEventListeners() {
         });
     }
     
+    // Leaderboard class selector
+    const leaderboardClassSelector = document.getElementById('leaderboardClassSelector');
+    if (leaderboardClassSelector) {
+        leaderboardClassSelector.addEventListener('change', (e) => {
+            loadLeaderboardData(e.target.value);
+        });
+    }
+    
+    // Leaderboard tab buttons
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            switchLeaderboardTab(e.currentTarget.dataset.tab);
+        });
+    });
+    
     // Refresh button
     const refreshBtn = document.getElementById('refreshData');
     if (refreshBtn) {
@@ -1087,17 +1144,14 @@ function exportData() {
     showToast('Export feature coming soon! 📊', 'info');
 }
 
-function showSettings() {
-    showToast('Settings feature coming soon! ⚙️', 'info');
-}
-
 // Make functions global
 window.openGroupModal = openGroupModal;
 window.updateStudentPoints = updateStudentPoints;
 window.applyGroupBonus = applyGroupBonus;
 window.showLoginModal = showLoginModal;
 window.switchView = switchView;
+window.switchPage = switchPage;
 window.exportData = exportData;
-window.showSettings = showSettings;
-window.initializePremiumApp = initializePremiumApp;
-window.switchLeaderboardTab = switchLeaderboardTab; // ADDED THIS LINE
+window.initializeSystemData = initializeSystemData;
+window.switchLeaderboardTab = switchLeaderboardTab;
+window.loadLeaderboardData = loadLeaderboardData;
